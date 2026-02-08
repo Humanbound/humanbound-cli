@@ -1,9 +1,10 @@
-# Humanbound CLI (Beta)
+# Humanbound CLI
 
 > CLI-first security testing for AI agents and chatbots. Adversarial attacks, behavioral QA, posture scoring, and guardrails export — from your terminal to your CI/CD pipeline.
 
 [![PyPI](https://img.shields.io/pypi/v/humanbound-cli)](https://pypi.org/project/humanbound-cli/)
 [![License](https://img.shields.io/badge/license-proprietary-blue)]()
+[![Version](https://img.shields.io/badge/version-0.2.0-green)]()
 
 ```
 pip install humanbound-cli
@@ -86,7 +87,7 @@ hb test
 hb test -e ./bot-config.json
 
 # Choose test category and depth
-hb test -t owasp_multi_turn -l system
+hb test -t humanbound/adversarial/owasp_multi_turn -l system
 ```
 
 ### 4. Review results
@@ -258,6 +259,8 @@ Providers are LLM configurations used for running security tests.
 | `projects use <id>` | Select project |
 | `projects current` | Show current project |
 | `projects show [id]` | Show project details |
+| `projects update [id]` | Update project name/description |
+| `projects delete [id]` | Delete project (with confirmation) |
 
 <details>
 <summary><code>init</code> — scan bot & create project</summary>
@@ -297,27 +300,15 @@ Testing Level:
   --testing-level, -l   Depth of testing (default: unit)
                         unit | system | acceptance
 
-Chat Endpoint (required):
-  --chat-endpoint       Chat completion URL of the bot to test
-  --chat-header         Header for chat endpoint (repeatable)
-  --chat-payload        JSON payload template for chat
-
-Init Endpoint (optional):
-  --init-endpoint       Thread initialization URL
-  --init-header         Header for init endpoint (repeatable)
-  --init-payload        JSON payload for init
-
-Auth Endpoint (optional):
-  --auth-endpoint       Auth/token endpoint URL
-  --auth-header         Header for auth endpoint (repeatable)
-  --auth-payload        JSON payload for auth
+Endpoint Override (optional — only needed if no default integration):
+  -e, --endpoint        Bot integration config — JSON string or file path.
+                        Same shape as 'hb init --endpoint'. Overrides default.
 
 Other:
   --provider-id         Provider to use (default: first available)
   --name, -n            Experiment name (auto-generated if omitted)
   --lang                Language (default: english). Accepts codes: en, de, es...
   --adaptive            Enable adaptive mode (evolutionary attack strategy)
-  --streaming           Enable streaming mode (requires wss:// endpoint)
   --no-auto-start       Create without starting (manual mode)
   --wait, -w            Wait for completion
   --fail-on SEVERITY    Exit non-zero if findings >= severity
@@ -336,7 +327,8 @@ Other:
 | `experiments status <id> --watch` | Watch until completion |
 | `experiments wait <id>` | Wait with progressive backoff (30s -> 60s -> 120s -> 300s) |
 | `experiments logs <id>` | List experiment logs |
-| `experiments report <id>` | Download HTML report |
+| `experiments terminate <id>` | Stop a running experiment |
+| `experiments delete <id>` | Delete experiment (with confirmation) |
 
 `status` is also available as a top-level alias — without an ID it shows the most recent experiment:
 
@@ -344,14 +336,76 @@ Other:
 hb status [experiment_id] [--watch]
 ```
 
+### Findings
+
+Track long-term security vulnerabilities across experiments.
+
+| Command | Description |
+|---------|-------------|
+| `findings` | List findings (filterable by --status, --severity) |
+| `findings update <id>` | Update finding status or severity |
+
+Finding states: **open** → **stale** (30+ days unseen) → **fixed** (resolved). Findings can also **regress** (was fixed, reappeared).
+
+### Coverage
+
+| Command | Description |
+|---------|-------------|
+| `coverage` | Test coverage summary |
+| `coverage --gaps` | Include untested categories |
+
+### Campaigns
+
+Continuous security assurance with automated campaign management (ASCAM).
+
+| Command | Description |
+|---------|-------------|
+| `campaigns` | Show current campaign plan |
+| `campaigns break` | Stop a running campaign |
+
+ASCAM phases: Reconnaissance → Hardening → Red Teaming → Analysis → Monitoring
+
+### Upload Conversation Logs
+
+Evaluate real production conversations against security judges.
+
+| Command | Description |
+|---------|-------------|
+| `upload-logs <file>` | Upload JSON conversation logs |
+
+Options: `--tag`, `--lang`
+
+### API Keys
+
+| Command | Description |
+|---------|-------------|
+| `api-keys list` | List API keys |
+| `api-keys create` | Create new key (--name required, --scopes: admin/write/read) |
+| `api-keys update <id>` | Update key name, scopes, or active state |
+| `api-keys revoke <id>` | Revoke (delete) an API key |
+
+### Members
+
+| Command | Description |
+|---------|-------------|
+| `members list` | List organisation members |
+| `members invite <email>` | Invite member (--role: admin/developer) |
+| `members remove <id>` | Remove member |
+
 ### Results & Export
 
 ```bash
 # View experiment results (table, json, or csv)
 hb logs [experiment_id] [--format table] [--verdict pass|fail] [--page N] [--size N]
 
-# Security posture score
-hb posture [--json]
+# Security posture
+hb posture [--json] [--trends]
+
+# Test coverage
+hb coverage [--gaps] [--json]
+
+# Findings
+hb findings [--status open] [--severity high] [--json]
 
 # Export guardrails configuration
 hb guardrails [--vendor humanbound|openai] [--format json|yaml] [-o FILE]
@@ -379,7 +433,7 @@ hb switch abc123
 hb init -n "Support Bot" -e ./bot-config.json
 
 # Run adversarial test (uses project's default integration)
-hb test -t owasp_multi_turn -l unit
+hb test -t humanbound/adversarial/owasp_multi_turn -l unit
 
 # Watch and review
 hb status --watch

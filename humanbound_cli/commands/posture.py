@@ -15,7 +15,8 @@ console = Console()
 @click.command("posture")
 @click.option("--project", "-p", help="Project ID (uses current if not specified)")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
-def posture_command(project: str, as_json: bool):
+@click.option("--trends", is_flag=True, help="Show posture history over time")
+def posture_command(project: str, as_json: bool, trends: bool):
     """View security posture score for a project.
 
     The posture score is a composite metric (0-100) reflecting:
@@ -28,6 +29,7 @@ def posture_command(project: str, as_json: bool):
     Examples:
       hb posture                    # Show current project posture
       hb posture --project abc123   # Show specific project
+      hb posture --trends           # Show posture history
       hb posture --json             # Output as JSON
     """
     client = HumanboundClient()
@@ -44,6 +46,18 @@ def posture_command(project: str, as_json: bool):
         raise SystemExit(1)
 
     try:
+        if trends:
+            with console.status("Fetching posture trends..."):
+                response = client.get_posture_trends(project_id)
+
+            if as_json:
+                import json
+                print(json.dumps(response, indent=2, default=str))
+                return
+
+            _display_trends(response)
+            return
+
         # Get posture from API
         with console.status("Calculating posture..."):
             response = client.get(f"projects/{project_id}/posture", include_project=True)
@@ -163,6 +177,64 @@ def _score_to_grade(score: float) -> str:
         return "D"
     else:
         return "F"
+
+
+def _display_trends(response):
+    """Display posture trend history."""
+    trends = response.get("data", response) if isinstance(response, dict) else response
+
+    if isinstance(trends, dict):
+        snapshots = trends.get("snapshots", trends.get("data", []))
+    else:
+        snapshots = trends
+
+    if not snapshots:
+        console.print("[yellow]No posture history available yet.[/yellow]")
+        console.print("Run some experiments to build trend data.")
+        return
+
+    table = Table(title="Posture History")
+    table.add_column("Date", style="dim")
+    table.add_column("Score", justify="right")
+    table.add_column("Grade", justify="center")
+    table.add_column("Change", justify="center")
+
+    prev_score = None
+    for snapshot in snapshots:
+        score = snapshot.get("score", 0)
+        grade = snapshot.get("grade", _score_to_grade(score))
+        date = str(snapshot.get("created_at", snapshot.get("date", "")))[:10]
+
+        # Color score
+        if score >= 80:
+            score_color = "green"
+        elif score >= 60:
+            score_color = "yellow"
+        else:
+            score_color = "red"
+
+        # Trend direction
+        if prev_score is not None:
+            diff = score - prev_score
+            if diff > 0:
+                change = f"[green]+{diff:.0f}[/green]"
+            elif diff < 0:
+                change = f"[red]{diff:.0f}[/red]"
+            else:
+                change = "[dim]-[/dim]"
+        else:
+            change = "[dim]-[/dim]"
+
+        table.add_row(
+            date,
+            f"[{score_color}]{score:.0f}[/{score_color}]",
+            grade,
+            change,
+        )
+
+        prev_score = score
+
+    console.print(table)
 
 
 def _calculate_fallback_posture(client: HumanboundClient, project_id: str):

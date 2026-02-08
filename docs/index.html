@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Humanbound CLI Documentation | AI Agent Security Testing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        :root {
+            --primary-dark: #1E2323;
+            --accent-orange: #FD9506;
+            --text-light: #E6EDF3;
+            --text-secondary: #8B949E;
+            --code-bg: #0D1117;
+            --border-color: #30363D;
+            --success-green: #3FB950;
+            --warning-yellow: #F0C000;
+            --error-red: #F85149;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--primary-dark);
+            color: var(--text-light);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        /* Header */
+        header {
+            background-color: rgba(13, 17, 23, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-section img {
+            height: 32px;
+            width: auto;
+        }
+
+        .logo-section h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .version-badge {
+            background-color: var(--accent-orange);
+            color: var(--primary-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .hamburger span {
+            width: 24px;
+            height: 2px;
+            background-color: var(--text-light);
+            transition: all 0.3s;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            padding: 2rem 0;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar nav ul li a {
+            display: block;
+            padding: 0.5rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border-left: 2px solid transparent;
+        }
+
+        .sidebar nav ul li a:hover {
+            color: var(--accent-orange);
+            border-left-color: var(--accent-orange);
+            background-color: rgba(253, 149, 6, 0.05);
+        }
+
+        .sidebar nav ul li a.active {
+            color: var(--accent-orange);
+            border-left-color: var(--accent-orange);
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 3rem 4rem;
+            min-width: 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0 6rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--accent-orange) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-code {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--accent-orange);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 600px;
+            text-align: left;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .hero-code .cmd-prompt {
+            color: var(--accent-orange);
+        }
+
+        .hero-code .cmd {
+            color: var(--text-light);
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--accent-orange);
+            color: var(--primary-dark);
+            padding: 1rem 2.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(253, 149, 6, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(253, 149, 6, 0.4);
+        }
+
+        /* Content Sections */
+        section {
+            margin-bottom: 5rem;
+        }
+
+        section h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+            border-bottom: 2px solid var(--accent-orange);
+            padding-bottom: 0.5rem;
+        }
+
+        section h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--text-light);
+        }
+
+        section h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--accent-orange);
+        }
+
+        section p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        section ul, section ol {
+            margin: 1rem 0 1rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        section li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code Blocks */
+        .code-block-wrapper {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--accent-orange);
+            border-radius: 6px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .code-block::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .code-block::-webkit-scrollbar-track {
+            background: var(--primary-dark);
+        }
+
+        .code-block::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .code-block pre {
+            margin: 0;
+        }
+
+        .code-block code {
+            color: var(--text-light);
+        }
+
+        .code-block .comment {
+            color: var(--text-secondary);
+        }
+
+        .code-block .prompt {
+            color: var(--accent-orange);
+        }
+
+        .code-block .string {
+            color: var(--success-green);
+        }
+
+        .code-block .keyword {
+            color: #FF7B72;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: var(--border-color);
+            color: var(--text-secondary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .copy-button:hover {
+            background: var(--accent-orange);
+            color: var(--primary-dark);
+        }
+
+        .copy-button.copied {
+            background: var(--success-green);
+            color: var(--primary-dark);
+        }
+
+        /* Inline Code */
+        code {
+            background: var(--code-bg);
+            color: var(--accent-orange);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        /* Command Reference Table */
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .command-card {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .command-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+
+        .command-card h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            color: var(--accent-orange);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .command-card p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .command-group {
+            margin-bottom: 3rem;
+        }
+
+        .command-group h3 {
+            color: var(--accent-orange);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .badge-success {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--success-green);
+        }
+
+        .badge-warning {
+            background: rgba(240, 192, 0, 0.2);
+            color: var(--warning-yellow);
+        }
+
+        .badge-error {
+            background: rgba(248, 81, 73, 0.2);
+            color: var(--error-red);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            border-left: 3px solid;
+        }
+
+        .alert-info {
+            background: rgba(58, 139, 255, 0.1);
+            border-left-color: #3A8BFF;
+            color: var(--text-light);
+        }
+
+        .alert-success {
+            background: rgba(63, 185, 80, 0.1);
+            border-left-color: var(--success-green);
+            color: var(--text-light);
+        }
+
+        .alert-warning {
+            background: rgba(240, 192, 0, 0.1);
+            border-left-color: var(--warning-yellow);
+            color: var(--text-light);
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--accent-orange);
+            color: var(--primary-dark);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(253, 149, 6, 0.3);
+            font-size: 1.5rem;
+            z-index: 99;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(253, 149, 6, 0.4);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 4rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent-orange);
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            main {
+                padding: 2rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                width: 80%;
+                max-width: 300px;
+                height: calc(100vh - 70px);
+                background: var(--primary-dark);
+                border-right: 1px solid var(--border-color);
+                transition: left 0.3s;
+                z-index: 90;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+
+            .hero {
+                padding: 2rem 0 3rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-code {
+                padding: 1rem;
+                font-size: 0.85rem;
+            }
+
+            section h2 {
+                font-size: 1.75rem;
+            }
+
+            .command-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 45px;
+                height: 45px;
+            }
+
+            footer {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="https://cdneunorth.blob.core.windows.net/data/humanbound_logo.png" alt="Humanbound Logo">
+                <h1>CLI Documentation</h1>
+                <span class="version-badge">v0.2.0</span>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <ul>
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#installation">Installation</a></li>
+                    <li><a href="#quick-start">Quick Start</a></li>
+                    <li><a href="#bot-config">Bot Configuration File</a></li>
+                    <li><a href="#test-reference">Test Command Reference</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#experiments">Experiments</a></li>
+                    <li><a href="#security-posture">Security Posture</a></li>
+                    <li><a href="#findings">Findings</a></li>
+                    <li><a href="#test-coverage">Test Coverage</a></li>
+                    <li><a href="#campaigns">Campaigns (ASCAM)</a></li>
+                    <li><a href="#upload-logs">Upload Conversation Logs</a></li>
+                    <li><a href="#model-providers">Model Providers</a></li>
+                    <li><a href="#api-keys">API Keys</a></li>
+                    <li><a href="#team-members">Team Members</a></li>
+                    <li><a href="#guardrails">Guardrails Export</a></li>
+                    <li><a href="#cicd">CI/CD Integration</a></li>
+                    <li><a href="#authentication">Authentication &amp; Context</a></li>
+                    <li><a href="#command-reference">Command Reference</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main>
+            <section id="hero" class="hero">
+                <h1>Humanbound CLI</h1>
+                <p>Security test your AI agents from the terminal.</p>
+
+                <div class="hero-code">
+                    <div><span class="cmd">pip install humanbound-cli</span></div>
+                    <div style="height: 1rem;"></div>
+                    <div><span class="cmd-prompt">$ </span><span class="cmd">hb login</span></div>
+                    <div><span class="cmd-prompt">$ </span><span class="cmd">hb init --name "My Bot" --endpoint ./bot-config.json</span></div>
+                    <div><span class="cmd-prompt">$ </span><span class="cmd">hb test</span></div>
+                    <div><span class="cmd-prompt">$ </span><span class="cmd">hb posture</span></div>
+                </div>
+
+                <a href="#installation" class="cta-button">Get Started</a>
+            </section>
+
+            <section id="installation">
+                <h2>Installation</h2>
+                <p>Install the Humanbound CLI using pip:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>pip install humanbound-cli</code></pre>
+                    </div>
+                </div>
+
+                <h3>Verify Installation</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb --help</code></pre>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Requirements:</strong> Python 3.10 or higher
+                </div>
+            </section>
+
+            <section id="quick-start">
+                <h2>Quick Start</h2>
+                <p>Get from installation to your first security test in minutes. This walkthrough will guide you through authenticating, creating a project, running tests, and viewing results.</p>
+
+                <h3>Step 1: Authenticate</h3>
+                <p>Start by logging into your Humanbound account:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb login</code></pre>
+                    </div>
+                </div>
+
+                <p>This opens your browser for OAuth authentication. Your credentials are stored locally at <code>~/.humanbound/</code>.</p>
+
+                <h3>Step 2: Select Organisation</h3>
+                <p>List available organisations and select one to work with:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb orgs list
+hb switch &lt;org-id&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h3>Step 3: Create a Project</h3>
+                <p>Initialize a new project from multiple sources. The CLI will scan your bot, extract scope, assess risk, and create the project. The <code>hb init</code> command is the centerpiece of project setup:</p>
+
+                <h4>From a System Prompt File</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb init -n "My Bot" --prompt ./system_prompt.txt</code></pre>
+                    </div>
+                </div>
+
+                <h4>From a Live Bot Endpoint (Recommended)</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb init -n "My Bot" --endpoint ./bot-config.json</code></pre>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>Recommended:</strong> Using <code>--endpoint</code> (or <code>-e</code>) during init saves the bot integration as the project's default integration. This means subsequent <code>hb test</code> commands work without specifying endpoints again.
+                </div>
+
+                <h4>From a Live URL (Browser Discovery)</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb init -n "My Bot" --url https://mybot.example.com</code></pre>
+                    </div>
+                </div>
+
+                <h4>From Repository</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb init -n "My Bot" --repo ./agent-code</code></pre>
+                    </div>
+                </div>
+
+                <h4>From OpenAPI Spec</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb init -n "My Bot" --openapi ./spec.yaml</code></pre>
+                    </div>
+                </div>
+
+                <h4>Combine Sources for Best Results</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb init -n "My Bot" --prompt ./prompt.txt --endpoint ./config.json</code></pre>
+                    </div>
+                </div>
+
+                <p>The <code>--endpoint / -e</code> flag accepts a JSON config file (or inline JSON string) describing your bot's API. See the <a href="#bot-config" style="color: var(--accent-orange);">Bot Configuration File</a> section for the full specification.</p>
+
+                <h3>Step 4: Run Security Tests</h3>
+                <p>Execute adversarial and behavioral security tests against your AI agent. After initializing with <code>--endpoint</code>, the project's default integration is already configured:</p>
+
+                <h4>Default Test (Uses Project's Default Integration)</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Uses project's default integration (configured during init)</span>
+hb test</code></pre>
+                    </div>
+                </div>
+
+                <h4>Choose Test Category</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Single-turn attacks</span>
+hb test -t humanbound/adversarial/owasp_single_turn
+
+<span class="comment"># Multi-turn attacks (default)</span>
+hb test -t humanbound/adversarial/owasp_multi_turn
+
+<span class="comment"># Agentic multi-turn (for AI agents with tool use)</span>
+hb test -t humanbound/adversarial/owasp_agentic_multi_turn
+
+<span class="comment"># Behavioral testing (functionality, consistency)</span>
+hb test -t humanbound/behavioral/behavioral</code></pre>
+                    </div>
+                </div>
+
+                <h4>Testing Depth Levels</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Quick scan (~20 minutes, default)</span>
+hb test -l unit
+
+<span class="comment"># Standard scan (~45 minutes)</span>
+hb test -l system
+
+<span class="comment"># Comprehensive scan (~90 minutes)</span>
+hb test -l acceptance</code></pre>
+                    </div>
+                </div>
+
+                <h4>Adaptive Mode (Evolutionary Attacks)</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb test --adaptive</code></pre>
+                    </div>
+                </div>
+
+                <h4>Wait for Completion</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Block until test completes (useful for CI/CD)</span>
+hb test --wait</code></pre>
+                    </div>
+                </div>
+
+                <h4>Non-English Testing</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb test --lang german</code></pre>
+                    </div>
+                </div>
+
+                <h4>Advanced: Override Endpoint</h4>
+                <p>If you need to override the default integration for a specific test run, or if no default integration was configured during init, use <code>-e</code> with a JSON config file (same shape as <code>hb init --endpoint</code>):</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Override integration for this test only</span>
+hb test -e ./bot-config.json
+
+<span class="comment"># Or with inline JSON</span>
+hb test -e '{"streaming": false, "chat_completion": {"endpoint": "https://bot.example.com/chat", "headers": {"Authorization": "Bearer token"}, "payload": {"content": "$PROMPT"}}}'</code></pre>
+                    </div>
+                </div>
+
+                <h3>Step 5: View Results</h3>
+                <p>Monitor test progress and analyze results:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Check experiment status</span>
+hb status
+
+<span class="comment"># Live status updates</span>
+hb status --watch
+
+<span class="comment"># View latest experiment logs</span>
+hb logs
+
+<span class="comment"># Export as JSON</span>
+hb logs --format json -o results.json
+
+<span class="comment"># Export as HTML report</span>
+hb logs --format html -o report.html
+
+<span class="comment"># View security posture score</span>
+hb posture</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="bot-config">
+                <h2>Bot Configuration File</h2>
+                <p>The <code>--endpoint / -e</code> flag on <code>hb init</code> accepts a JSON config file (or inline JSON string) that describes how to communicate with your bot. This integration is saved as the project's default, so subsequent <code>hb test</code> commands work automatically.</p>
+
+                <h3>Full Configuration Shape</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>{
+  <span class="string">"streaming"</span>: false,
+  <span class="string">"thread_auth"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">""</span>,
+    <span class="string">"headers"</span>: {},
+    <span class="string">"payload"</span>: {}
+  },
+  <span class="string">"thread_init"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">""</span>,
+    <span class="string">"headers"</span>: {},
+    <span class="string">"payload"</span>: {}
+  },
+  <span class="string">"chat_completion"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">"https://your-bot.com/chat"</span>,
+    <span class="string">"headers"</span>: {
+      <span class="string">"Authorization"</span>: <span class="string">"Bearer your-token"</span>,
+      <span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>
+    },
+    <span class="string">"payload"</span>: {
+      <span class="string">"content"</span>: <span class="string">"$PROMPT"</span>
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h3>Configuration Fields</h3>
+                <ul>
+                    <li><strong><code>chat_completion</code></strong> (required) -- The endpoint your bot listens on for chat messages. This is the only required section.</li>
+                    <li><strong><code>thread_init</code></strong> (optional) -- For bots that require a thread or session to be created before sending messages.</li>
+                    <li><strong><code>thread_auth</code></strong> (optional) -- For bots that require authentication (e.g., OAuth token exchange) before testing can begin.</li>
+                    <li><strong><code>$PROMPT</code></strong> -- The placeholder in the payload that gets replaced with each test prompt at runtime.</li>
+                    <li><strong><code>streaming</code></strong> -- Set to <code>true</code> for WebSocket/SSE streaming endpoints.</li>
+                </ul>
+
+                <h3>Example: Simple API Key Auth</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>{
+  <span class="string">"chat_completion"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">"https://api.example.com/chat"</span>,
+    <span class="string">"headers"</span>: { <span class="string">"x-api-key"</span>: <span class="string">"sk-xxx"</span> },
+    <span class="string">"payload"</span>: { <span class="string">"content"</span>: <span class="string">"$PROMPT"</span> }
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h3>Example: With Thread Initialization</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>{
+  <span class="string">"thread_init"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">"https://api.example.com/threads"</span>,
+    <span class="string">"headers"</span>: { <span class="string">"Authorization"</span>: <span class="string">"Bearer token"</span> },
+    <span class="string">"payload"</span>: {}
+  },
+  <span class="string">"chat_completion"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">"https://api.example.com/chat"</span>,
+    <span class="string">"headers"</span>: { <span class="string">"Authorization"</span>: <span class="string">"Bearer token"</span> },
+    <span class="string">"payload"</span>: {
+      <span class="string">"messages"</span>: [{ <span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"$PROMPT"</span> }]
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h3>Example: With OAuth Authentication</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>{
+  <span class="string">"streaming"</span>: false,
+  <span class="string">"thread_auth"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">"https://bot.com/oauth/token"</span>,
+    <span class="string">"headers"</span>: {},
+    <span class="string">"payload"</span>: {
+      <span class="string">"client_id"</span>: <span class="string">"x"</span>,
+      <span class="string">"client_secret"</span>: <span class="string">"y"</span>
+    }
+  },
+  <span class="string">"thread_init"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">"https://bot.com/threads"</span>,
+    <span class="string">"headers"</span>: {},
+    <span class="string">"payload"</span>: {}
+  },
+  <span class="string">"chat_completion"</span>: {
+    <span class="string">"endpoint"</span>: <span class="string">"https://bot.com/chat"</span>,
+    <span class="string">"headers"</span>: {
+      <span class="string">"Authorization"</span>: <span class="string">"Bearer token"</span>
+    },
+    <span class="string">"payload"</span>: {
+      <span class="string">"content"</span>: <span class="string">"$PROMPT"</span>
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Tip:</strong> Save your config file as <code>bot-config.json</code> in your project root and use <code>hb init -n "My Bot" -e ./bot-config.json</code> to create a project with the integration pre-configured.
+                </div>
+            </section>
+
+            <section id="test-reference">
+                <h2>Test Command Reference</h2>
+                <p>Full reference for the <code>hb test</code> command and all its options.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb test [OPTIONS]
+
+<span class="comment">Test Configuration:</span>
+  -t, --test-category     Test to run (default: owasp_multi_turn)
+  -l, --testing-level     Depth: unit | system | acceptance
+  -n, --name              Experiment name (auto-generated if omitted)
+  --lang                  Language (default: english). Accepts codes: en, de, es
+  --provider-id           Provider to use (default: first available)
+
+<span class="comment">Behavior:</span>
+  --adaptive              Enable adaptive mode (evolutionary attacks)
+  --no-auto-start         Create without starting (manual mode)
+  -w, --wait              Wait for completion
+  --fail-on SEVERITY      Exit non-zero if findings &gt;= severity
+                          Values: critical, high, medium, low, any
+
+<span class="comment">Endpoint Override (optional):</span>
+  -e, --endpoint          Bot integration config &mdash; JSON string or file path.
+                          Same shape as 'hb init --endpoint'.
+                          Overrides the project's default integration.</code></pre>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Note:</strong> The <code>-e / --endpoint</code> flag is only needed if your project was not initialized with <code>hb init --endpoint</code>, or if you want to temporarily test against a different bot. When a default integration is configured, <code>hb test</code> works with no additional flags.
+                </div>
+            </section>
+
+            <section id="projects">
+                <h2>Projects</h2>
+                <p>Projects represent AI agents or chatbots under test. Each project contains configuration, scope definitions, and associated test experiments.</p>
+
+                <h3>List Projects</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb projects list</code></pre>
+                    </div>
+                </div>
+
+                <h3>Set Active Project</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb projects use &lt;id&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h3>Show Project Details</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Show current project</span>
+hb projects show
+
+<span class="comment"># Show specific project</span>
+hb projects show &lt;id&gt;
+
+<span class="comment"># Alternative: show active project</span>
+hb projects current</code></pre>
+                    </div>
+                </div>
+
+                <h3>Update Project</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Update current project</span>
+hb projects update --name "New Name"
+
+<span class="comment"># Update specific project</span>
+hb projects update &lt;id&gt; --description "Updated description"</code></pre>
+                    </div>
+                </div>
+
+                <h3>Delete Project</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Delete with confirmation</span>
+hb projects delete &lt;id&gt;
+
+<span class="comment"># Skip confirmation</span>
+hb projects delete &lt;id&gt; --force</code></pre>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> Deleting a project will also delete all associated experiments, logs, and findings. This action cannot be undone.
+                </div>
+            </section>
+
+            <section id="experiments">
+                <h2>Experiments</h2>
+                <p>Experiments are individual test executions that generate attack prompts, run conversations with your AI agent, and produce security verdicts.</p>
+
+                <h3>List Experiments</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb experiments list</code></pre>
+                    </div>
+                </div>
+
+                <h3>Show Experiment Details</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb experiments show &lt;id&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h3>Check Experiment Status</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Single status check</span>
+hb experiments status &lt;id&gt;
+
+<span class="comment"># Live updates (refreshes every 5 seconds)</span>
+hb experiments status &lt;id&gt; --watch</code></pre>
+                    </div>
+                </div>
+
+                <h3>Wait for Completion</h3>
+                <p>Block until an experiment completes (useful for CI/CD pipelines):</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Wait indefinitely</span>
+hb experiments wait &lt;id&gt;
+
+<span class="comment"># Wait with timeout (minutes)</span>
+hb experiments wait &lt;id&gt; --timeout 60</code></pre>
+                    </div>
+                </div>
+
+                <h3>View Experiment Logs</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># View all logs</span>
+hb experiments logs &lt;id&gt;
+
+<span class="comment"># Filter by result</span>
+hb experiments logs &lt;id&gt; --result fail
+hb experiments logs &lt;id&gt; --result pass</code></pre>
+                    </div>
+                </div>
+
+                <h3>Terminate Running Experiment</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb experiments terminate &lt;id&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h3>Delete Experiment</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Delete with confirmation</span>
+hb experiments delete &lt;id&gt;
+
+<span class="comment"># Skip confirmation</span>
+hb experiments delete &lt;id&gt; --force</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="security-posture">
+                <h2>Security Posture</h2>
+                <p>The security posture score (0-100) provides a comprehensive view of your AI agent's security health. It's composed of three weighted factors:</p>
+
+                <ul>
+                    <li><strong>Finding Score (40%)</strong>: Based on open, stale, and regressed vulnerabilities</li>
+                    <li><strong>Coverage Score (30%)</strong>: Attack categories and techniques tested</li>
+                    <li><strong>Resilience Score (30%)</strong>: Pass rates and judge confidence levels</li>
+                </ul>
+
+                <h3>View Current Posture</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb posture</code></pre>
+                    </div>
+                </div>
+
+                <h3>View Historical Trends</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb posture --trends</code></pre>
+                    </div>
+                </div>
+
+                <h3>Export as JSON</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb posture --json</code></pre>
+                    </div>
+                </div>
+
+                <h3>View Specific Project</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb posture --project &lt;id&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h3>Posture Grades</h3>
+                <div class="command-grid">
+                    <div class="command-card">
+                        <h4>A (90-100)</h4>
+                        <p>Excellent security posture with minimal vulnerabilities and comprehensive coverage</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>B (75-89)</h4>
+                        <p>Good security posture with minor vulnerabilities or coverage gaps</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>C (60-74)</h4>
+                        <p>Fair security posture requiring attention to identified issues</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>D (40-59)</h4>
+                        <p>Poor security posture with significant vulnerabilities or coverage gaps</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>F (0-39)</h4>
+                        <p>Critical security posture requiring immediate remediation</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="findings">
+                <h2>Findings</h2>
+                <p>Findings are persistent, deduplicated vulnerability records that bridge individual experiments to your overall security posture. They provide long-term memory of security issues across multiple test runs.</p>
+
+                <h3>List All Findings</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb findings</code></pre>
+                    </div>
+                </div>
+
+                <h3>Filter by Status</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb findings --status open
+hb findings --status stale
+hb findings --status fixed
+hb findings --status regressed</code></pre>
+                    </div>
+                </div>
+
+                <h3>Filter by Severity</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb findings --severity critical
+hb findings --severity high
+hb findings --severity medium
+hb findings --severity low
+hb findings --severity info</code></pre>
+                    </div>
+                </div>
+
+                <h3>Export as JSON</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb findings --json</code></pre>
+                    </div>
+                </div>
+
+                <h3>Update Finding Status</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Mark as fixed</span>
+hb findings update &lt;id&gt; --status fixed
+
+<span class="comment"># Update severity</span>
+hb findings update &lt;id&gt; --severity high</code></pre>
+                    </div>
+                </div>
+
+                <h3>Finding States</h3>
+                <div class="command-grid">
+                    <div class="command-card">
+                        <h4>Open <span class="badge badge-error">1.0x penalty</span></h4>
+                        <p>Active vulnerability requiring attention</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Stale <span class="badge badge-warning">0.5x penalty</span></h4>
+                        <p>Not seen in 30+ days, may be fixed</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Fixed <span class="badge badge-success">0x penalty</span></h4>
+                        <p>User-confirmed resolution</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Regressed <span class="badge badge-error">1.2x penalty</span></h4>
+                        <p>Was fixed, but reappeared (worse than open)</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="test-coverage">
+                <h2>Test Coverage</h2>
+                <p>Track which attack categories, techniques, and vectors have been tested against your AI agent. Coverage information helps identify blind spots in your security testing.</p>
+
+                <h3>View Coverage Summary</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb coverage</code></pre>
+                    </div>
+                </div>
+
+                <h3>Show Untested Categories</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb coverage --gaps</code></pre>
+                    </div>
+                </div>
+
+                <h3>Export as JSON</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb coverage --json</code></pre>
+                    </div>
+                </div>
+
+                <p>Coverage tracking follows an AFL-style (American Fuzzy Lop) coverage-guided approach with 5 priority levels, ensuring high-impact vulnerabilities are tested first.</p>
+            </section>
+
+            <section id="campaigns">
+                <h2>Campaigns (ASCAM)</h2>
+                <p>ASCAM (AI Security Continuous Assurance Model) provides automated campaign management through five phases: Reconnaissance → Hardening → Red Teaming → Analysis → Monitoring.</p>
+
+                <h3>View Current Campaign</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb campaigns</code></pre>
+                    </div>
+                </div>
+
+                <h3>Export as JSON</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb campaigns --json</code></pre>
+                    </div>
+                </div>
+
+                <h3>Stop Running Campaign</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb campaigns break</code></pre>
+                    </div>
+                </div>
+
+                <h3>ASCAM Phases</h3>
+                <div class="command-grid">
+                    <div class="command-card">
+                        <h4>Reconnaissance</h4>
+                        <p>Initial discovery phase with comprehensive attack surface mapping</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Hardening</h4>
+                        <p>Targeted retesting of identified vulnerabilities and weak areas</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Red Teaming</h4>
+                        <p>Evolutionary attack strategy using genetic algorithms</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Analysis</h4>
+                        <p>Clustering, summarization, and insight generation</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Monitoring</h4>
+                        <p>Continuous validation with drift detection and trigger evaluation</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Note:</strong> ASCAM automatically triggers phase transitions based on significant changes (critical findings, regressions, drift detection) or routine schedules (time-based, experiment completion).
+                </div>
+            </section>
+
+            <section id="upload-logs">
+                <h2>Upload Conversation Logs</h2>
+                <p>Evaluate real production conversations against security judges. This is useful for testing actual user interactions with your AI agent.</p>
+
+                <h3>Upload from File</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb upload-logs conversations.json</code></pre>
+                    </div>
+                </div>
+
+                <h3>Upload with Custom Tag</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb upload-logs conversations.json --tag prod-v2</code></pre>
+                    </div>
+                </div>
+
+                <h3>Specify Language</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb upload-logs conversations.json --lang english</code></pre>
+                    </div>
+                </div>
+
+                <h3>Expected JSON Format</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>[
+  {
+    "conversation": [
+      {"u": "user message", "a": "bot response"},
+      {"u": "follow up", "a": "bot reply"}
+    ],
+    "thread_id": "optional-thread-id"
+  },
+  {
+    "conversation": [
+      {"u": "another conversation", "a": "bot response"}
+    ],
+    "thread_id": "thread-2"
+  }
+]</code></pre>
+                    </div>
+                </div>
+
+                <p>Each conversation object should contain an array of turn pairs (user input and agent response). The <code>thread_id</code> is optional but recommended for tracking.</p>
+            </section>
+
+            <section id="model-providers">
+                <h2>Model Providers</h2>
+                <p>Configure LLM providers used for generating attacks, running security judges, and performing evaluations.</p>
+
+                <h3>List Providers</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb providers list</code></pre>
+                    </div>
+                </div>
+
+                <h3>Add Provider (Interactive)</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb providers add -i</code></pre>
+                    </div>
+                </div>
+
+                <h3>Add OpenAI Provider</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb providers add --name openai --api-key sk-...</code></pre>
+                    </div>
+                </div>
+
+                <h3>Add Azure OpenAI Provider</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb providers add --name azureopenai \
+  --api-key ... \
+  --endpoint https://your-resource.openai.azure.com</code></pre>
+                    </div>
+                </div>
+
+                <h3>Add Claude Provider</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb providers add --name claude --api-key sk-ant-...</code></pre>
+                    </div>
+                </div>
+
+                <h3>Update Provider</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Update API key</span>
+hb providers update &lt;id&gt; --api-key sk-new-key
+
+<span class="comment"># Set as default provider</span>
+hb providers update &lt;id&gt; --default</code></pre>
+                    </div>
+                </div>
+
+                <h3>Remove Provider</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb providers remove &lt;id&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h3>Supported Providers</h3>
+                <ul>
+                    <li><strong>OpenAI</strong>: GPT-4, GPT-3.5, and other OpenAI models</li>
+                    <li><strong>Claude</strong>: Anthropic's Claude models</li>
+                    <li><strong>Azure OpenAI</strong>: Azure-hosted OpenAI models</li>
+                    <li><strong>Gemini</strong>: Google's Gemini models</li>
+                    <li><strong>Grok</strong>: xAI's Grok models</li>
+                    <li><strong>Custom</strong>: OpenAI-compatible endpoints (requires whitelisting)</li>
+                </ul>
+            </section>
+
+            <section id="api-keys">
+                <h2>API Keys</h2>
+                <p>Create and manage API keys for programmatic access to Humanbound. Useful for CI/CD pipelines, automation scripts, and integrations.</p>
+
+                <h3>List API Keys</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb api-keys list</code></pre>
+                    </div>
+                </div>
+
+                <h3>Create API Key</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Create key (shows key once!)</span>
+hb api-keys create --name "CI Key"
+
+<span class="comment"># Create scoped key</span>
+hb api-keys create --name "CI Key" --scopes read</code></pre>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>Important:</strong> API keys are shown only once during creation. Store them securely. If lost, you must revoke and create a new key.
+                </div>
+
+                <h3>Update API Key</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Update name</span>
+hb api-keys update &lt;id&gt; --name "New Name"
+
+<span class="comment"># Activate key</span>
+hb api-keys update &lt;id&gt; --active
+
+<span class="comment"># Deactivate key</span>
+hb api-keys update &lt;id&gt; --inactive</code></pre>
+                    </div>
+                </div>
+
+                <h3>Revoke API Key</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Revoke with confirmation</span>
+hb api-keys revoke &lt;id&gt;
+
+<span class="comment"># Skip confirmation</span>
+hb api-keys revoke &lt;id&gt; --force</code></pre>
+                    </div>
+                </div>
+
+                <h3>Scopes</h3>
+                <ul>
+                    <li><strong>admin</strong>: Full access including user management and sensitive operations</li>
+                    <li><strong>write</strong>: Create and modify projects, run tests, update findings</li>
+                    <li><strong>read</strong>: View-only access to projects, experiments, and results</li>
+                </ul>
+            </section>
+
+            <section id="team-members">
+                <h2>Team Members</h2>
+                <p>Manage organisation members and their access levels.</p>
+
+                <h3>List Members</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb members list</code></pre>
+                    </div>
+                </div>
+
+                <h3>Invite Member</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Invite as developer (default)</span>
+hb members invite user@example.com
+
+<span class="comment"># Invite with specific role</span>
+hb members invite user@example.com --role admin</code></pre>
+                    </div>
+                </div>
+
+                <h3>Remove Member</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Remove with confirmation</span>
+hb members remove &lt;id&gt;
+
+<span class="comment"># Skip confirmation</span>
+hb members remove &lt;id&gt; --force</code></pre>
+                    </div>
+                </div>
+
+                <h3>Roles</h3>
+                <div class="command-grid">
+                    <div class="command-card">
+                        <h4>Owner</h4>
+                        <p>Full control including billing, member management, and all projects</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Admin</h4>
+                        <p>Manage projects, members, and run all operations except billing</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>Developer</h4>
+                        <p>Create and manage projects, run tests, view results</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="guardrails">
+                <h2>Guardrails Export</h2>
+                <p>Export security rules and guardrails learned from testing for integration with your bot's runtime defense layer.</p>
+
+                <h3>Export (Humanbound Format)</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb guardrails</code></pre>
+                    </div>
+                </div>
+
+                <h3>Export for OpenAI Moderation</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb guardrails --vendor openai</code></pre>
+                    </div>
+                </div>
+
+                <h3>Save to File</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb guardrails -o guardrails.json</code></pre>
+                    </div>
+                </div>
+
+                <h3>Export as YAML</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb guardrails --format yaml</code></pre>
+                    </div>
+                </div>
+
+                <h3>Include Reasoning</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb guardrails --include-reasoning</code></pre>
+                    </div>
+                </div>
+
+                <p>Guardrails are automatically learned from your testing campaigns using Few-Shot Learning Framework (FSLF). They include attack patterns, violation rules, and defense strategies.</p>
+            </section>
+
+            <section id="cicd">
+                <h2>CI/CD Integration</h2>
+                <p>Integrate Humanbound security testing into your continuous integration and deployment pipelines. When the project has a default integration configured (via <code>hb init --endpoint</code>), CI/CD pipelines only need <code>hb test</code> with no endpoint flags.</p>
+
+                <h3>GitHub Actions Example</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># .github/workflows/security-test.yml</span>
+name: AI Security Tests
+on: [push]
+
+jobs:
+  security-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Humanbound CLI
+        run: pip install humanbound-cli
+
+      - name: Run Security Tests
+        env:
+          HUMANBOUND_API_KEY: ${{ secrets.HB_API_KEY }}
+        run: |
+          hb test --wait --fail-on high
+
+      - name: Export Results
+        if: always()
+        run: hb logs --format json -o security-results.json
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-results
+          path: security-results.json</code></pre>
+                    </div>
+                </div>
+
+                <h3>Fail-On Thresholds</h3>
+                <p>Use the <code>--fail-on</code> flag to automatically fail CI builds when vulnerabilities of a certain severity are found:</p>
+
+                <div class="command-grid">
+                    <div class="command-card">
+                        <h4>--fail-on critical</h4>
+                        <p>Fail only on critical severity findings</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>--fail-on high</h4>
+                        <p>Fail on high or critical findings</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>--fail-on medium</h4>
+                        <p>Fail on medium, high, or critical findings</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>--fail-on low</h4>
+                        <p>Fail on low, medium, high, or critical findings</p>
+                    </div>
+                    <div class="command-card">
+                        <h4>--fail-on any</h4>
+                        <p>Fail on any finding (including info)</p>
+                    </div>
+                </div>
+
+                <h3>GitLab CI Example</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># .gitlab-ci.yml</span>
+security-test:
+  stage: test
+  image: python:3.10
+  script:
+    - pip install humanbound-cli
+    - hb test --wait --fail-on high
+    - hb logs --format json -o security-results.json
+  artifacts:
+    paths:
+      - security-results.json
+    when: always
+  variables:
+    HUMANBOUND_API_KEY: $HB_API_KEY</code></pre>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Tip:</strong> Always use <code>--wait</code> in CI/CD pipelines to ensure the test completes before the job finishes. Use <code>--fail-on</code> to enforce security quality gates.
+                </div>
+            </section>
+
+            <section id="authentication">
+                <h2>Authentication &amp; Context</h2>
+                <p>Manage authentication, organisation context, and access to documentation.</p>
+
+                <h3>Login</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb login</code></pre>
+                    </div>
+                </div>
+                <p>Opens your browser for OAuth authentication. Credentials are stored locally at <code>~/.humanbound/</code>.</p>
+
+                <h3>Logout</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Clear local credentials</span>
+hb logout
+
+<span class="comment"># Also revoke browser session</span>
+hb logout --revoke</code></pre>
+                    </div>
+                </div>
+
+                <h3>Check Authentication Status</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb whoami</code></pre>
+                    </div>
+                </div>
+                <p>Shows current user, active organisation, and active project.</p>
+
+                <h3>Switch Organisation</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb switch &lt;org-id&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h3>Open Documentation</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Open main documentation</span>
+hb docs
+
+<span class="comment"># Open specific topic</span>
+hb docs quickstart</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="command-reference">
+                <h2>Command Reference</h2>
+                <p>Complete reference of all available commands, organized by category.</p>
+
+                <div class="command-group">
+                    <h3>Authentication</h3>
+                    <div class="command-grid">
+                        <div class="command-card">
+                            <h4>hb login</h4>
+                            <p>Authenticate via OAuth browser flow</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb logout</h4>
+                            <p>Clear local credentials and optionally revoke session</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb whoami</h4>
+                            <p>Show current user, org, and project</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb switch &lt;org-id&gt;</h4>
+                            <p>Switch active organisation context</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-group">
+                    <h3>Projects</h3>
+                    <div class="command-grid">
+                        <div class="command-card">
+                            <h4>hb init</h4>
+                            <p>Create new project from prompt, endpoint, URL, repo, or OpenAPI</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb projects list</h4>
+                            <p>List all projects in current org</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb projects use &lt;id&gt;</h4>
+                            <p>Set active project for subsequent commands</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb projects show [id]</h4>
+                            <p>Show project details (current or specific)</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb projects current</h4>
+                            <p>Show active project information</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb projects update</h4>
+                            <p>Update project name or description</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb projects delete &lt;id&gt;</h4>
+                            <p>Delete project and all associated data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-group">
+                    <h3>Experiments</h3>
+                    <div class="command-grid">
+                        <div class="command-card">
+                            <h4>hb test</h4>
+                            <p>Create and run new security test experiment</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb experiments list</h4>
+                            <p>List all experiments for current project</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb experiments show &lt;id&gt;</h4>
+                            <p>Show detailed experiment information</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb experiments status &lt;id&gt;</h4>
+                            <p>Check experiment status (single or watch mode)</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb experiments wait &lt;id&gt;</h4>
+                            <p>Block until experiment completes (CI/CD)</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb experiments logs &lt;id&gt;</h4>
+                            <p>View conversation logs and verdicts</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb experiments terminate &lt;id&gt;</h4>
+                            <p>Stop running experiment</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb experiments delete &lt;id&gt;</h4>
+                            <p>Delete experiment and logs</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb status</h4>
+                            <p>Check status of latest experiment (alias)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-group">
+                    <h3>Results</h3>
+                    <div class="command-grid">
+                        <div class="command-card">
+                            <h4>hb logs</h4>
+                            <p>View logs from latest experiment</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb posture</h4>
+                            <p>View security posture score and grade</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb posture --trends</h4>
+                            <p>View historical posture timeline</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb coverage</h4>
+                            <p>View test coverage summary and gaps</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb findings</h4>
+                            <p>List persistent vulnerability findings</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb findings update &lt;id&gt;</h4>
+                            <p>Update finding status or severity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-group">
+                    <h3>Security</h3>
+                    <div class="command-grid">
+                        <div class="command-card">
+                            <h4>hb guardrails</h4>
+                            <p>Export learned security rules and patterns</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb campaigns</h4>
+                            <p>View current ASCAM campaign plan</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb campaigns break</h4>
+                            <p>Stop running campaign</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb upload-logs</h4>
+                            <p>Upload production conversations for evaluation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-group">
+                    <h3>Configuration</h3>
+                    <div class="command-grid">
+                        <div class="command-card">
+                            <h4>hb providers list</h4>
+                            <p>List configured LLM providers</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb providers add</h4>
+                            <p>Add new LLM provider configuration</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb providers update &lt;id&gt;</h4>
+                            <p>Update provider credentials or settings</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb providers remove &lt;id&gt;</h4>
+                            <p>Remove provider configuration</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb api-keys list</h4>
+                            <p>List API keys for programmatic access</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb api-keys create</h4>
+                            <p>Create new API key (shown once)</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb api-keys update &lt;id&gt;</h4>
+                            <p>Update key name or activation status</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb api-keys revoke &lt;id&gt;</h4>
+                            <p>Revoke and delete API key</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb members list</h4>
+                            <p>List organisation members</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb members invite</h4>
+                            <p>Invite new member to organisation</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb members remove &lt;id&gt;</h4>
+                            <p>Remove member from organisation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-group">
+                    <h3>Help</h3>
+                    <div class="command-grid">
+                        <div class="command-card">
+                            <h4>hb docs</h4>
+                            <p>Open online documentation or specific topic</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb --help</h4>
+                            <p>Show CLI help and available commands</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb &lt;command&gt; --help</h4>
+                            <p>Show help for specific command</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>Copyright 2025 Humanbound. Apache-2.0 License.</p>
+        <p>
+            <a href="https://github.com/humanbound" target="_blank">GitHub</a>
+            <a href="https://docs.humanbound.com" target="_blank">Documentation</a>
+            <a href="https://github.com/humanbound/issues" target="_blank">Report Issues</a>
+        </p>
+    </footer>
+
+    <div class="back-to-top" id="backToTop">↑</div>
+
+    <script>
+        // Hamburger menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+
+        hamburger.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 &&
+                !sidebar.contains(e.target) &&
+                !hamburger.contains(e.target) &&
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // Close sidebar when clicking a link on mobile
+        const sidebarLinks = sidebar.querySelectorAll('a');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+
+        // Active section highlighting
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -70% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    const activeLink = document.querySelector(`.sidebar nav a.active`);
+                    if (activeLink) {
+                        activeLink.classList.remove('active');
+                    }
+                    const newActiveLink = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+                    if (newActiveLink) {
+                        newActiveLink.classList.add('active');
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('section[id], .hero[id]').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling.querySelector('code');
+            const text = codeBlock.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        // Back to top button
+        const backToTop = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

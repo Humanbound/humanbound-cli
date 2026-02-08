@@ -870,6 +870,125 @@ class HumanboundClient:
         """
         self.delete(f"providers/{provider_id}")
 
+    # -------------------------------------------------------------------------
+    # Findings Methods
+    # -------------------------------------------------------------------------
+
+    def list_findings(self, project_id: str, status: Optional[str] = None, severity: Optional[str] = None, page: int = 1, size: int = 50) -> dict:
+        """List findings for a project."""
+        params = {"page": page, "size": size}
+        if status:
+            params["status"] = status
+        if severity:
+            params["severity"] = severity
+        return self.get(f"projects/{project_id}/findings", include_project=True, params=params)
+
+    def update_finding(self, project_id: str, finding_id: str, data: dict) -> dict:
+        """Update a finding."""
+        return self.put(f"projects/{project_id}/findings/{finding_id}", data=data)
+
+    # -------------------------------------------------------------------------
+    # Experiment Extensions
+    # -------------------------------------------------------------------------
+
+    def terminate_experiment(self, experiment_id: str) -> dict:
+        """Terminate a running experiment."""
+        return self.post(f"experiments/{experiment_id}/terminate", include_project=True)
+
+    def delete_experiment(self, experiment_id: str) -> Any:
+        """Delete an experiment."""
+        return self.delete(f"experiments/{experiment_id}", include_project=True)
+
+    # -------------------------------------------------------------------------
+    # Project Extensions
+    # -------------------------------------------------------------------------
+
+    def update_project(self, project_id: str, data: dict) -> dict:
+        """Update a project."""
+        return self.put(f"projects/{project_id}", data=data)
+
+    def delete_project(self, project_id: str) -> Any:
+        """Delete a project."""
+        return self.delete(f"projects/{project_id}")
+
+    # -------------------------------------------------------------------------
+    # API Key Methods
+    # -------------------------------------------------------------------------
+
+    def list_api_keys(self, page: int = 1, limit: int = 50) -> Any:
+        """List API keys."""
+        return self.get("api-keys", params={"page": page, "limit": limit}, include_org=False)
+
+    def create_api_key(self, name: str, scopes: str = "admin") -> dict:
+        """Create a new API key."""
+        return self.post("api-keys", data={"name": name, "scopes": scopes}, include_org=False)
+
+    def delete_api_key(self, key_id: str) -> Any:
+        """Delete an API key."""
+        return self.delete(f"api-keys/{key_id}", include_org=False)
+
+    def update_api_key(self, key_id: str, data: dict) -> dict:
+        """Update an API key."""
+        return self.put(f"api-keys/{key_id}", data=data, include_org=False)
+
+    # -------------------------------------------------------------------------
+    # Member Methods
+    # -------------------------------------------------------------------------
+
+    def list_members(self) -> Any:
+        """List organisation members."""
+        return self.get("members")
+
+    def invite_member(self, email: str, access_level: str) -> dict:
+        """Invite a member to the organisation."""
+        return self.post("members", data={"email": email, "access_level": access_level})
+
+    def remove_member(self, member_id: str) -> Any:
+        """Remove a member from the organisation."""
+        return self.delete(f"members/{member_id}")
+
+    # -------------------------------------------------------------------------
+    # Coverage Methods
+    # -------------------------------------------------------------------------
+
+    def get_coverage(self, project_id: str, include_gaps: bool = False) -> dict:
+        """Get test coverage for a project."""
+        params = {"include_gaps": "true"} if include_gaps else {}
+        return self.get(f"projects/{project_id}/coverage", params=params)
+
+    # -------------------------------------------------------------------------
+    # Posture Trends Methods
+    # -------------------------------------------------------------------------
+
+    def get_posture_trends(self, project_id: str) -> Any:
+        """Get posture trend history for a project."""
+        return self.get(f"projects/{project_id}/posture/trends")
+
+    # -------------------------------------------------------------------------
+    # Campaign Methods
+    # -------------------------------------------------------------------------
+
+    def get_campaign_plan(self, project_id: str) -> dict:
+        """Get the current campaign plan for a project."""
+        return self.get(f"projects/{project_id}/plan")
+
+    def break_campaign(self, project_id: str, campaign_id: str) -> dict:
+        """Break/stop a running campaign."""
+        return self.post(f"projects/{project_id}/plan/break", data={"campaign_id": campaign_id})
+
+    # -------------------------------------------------------------------------
+    # Upload Conversations Methods
+    # -------------------------------------------------------------------------
+
+    def upload_conversations(self, project_id: str, conversations: list, tag: Optional[str] = None, lang: Optional[str] = None) -> dict:
+        """Upload conversation logs for evaluation."""
+        data = {"conversations": conversations}
+        if tag:
+            data["tag"] = tag
+        if lang:
+            data["lang"] = lang
+        return self.post(f"projects/{project_id}/datasets/conversations", data=data, include_project=True)
+
 
 # Import ValidationError to this module
 from .exceptions import ValidationError

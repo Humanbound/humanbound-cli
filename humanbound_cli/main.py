@@ -6,7 +6,11 @@ from rich.console import Console
 from .client import HumanboundClient
 from .config import get_base_url
 
-from .commands import auth, orgs, projects, experiments, init, test, logs, posture, guardrails, docs, providers
+from .commands import (
+    auth, orgs, projects, experiments, init, test, logs, posture,
+    guardrails, docs, providers, findings, api_keys, members,
+    coverage, campaigns, upload_logs,
+)
 
 console = Console()
 
@@ -40,7 +44,7 @@ def cli(ctx, base_url: str):
     \b
     Project Sources:
       hb init --prompt ./prompt.txt   # From system prompt
-      hb init --endpoint <url>        # From live chatbot
+      hb init --endpoint ./config.json  # From live chatbot
       hb init --repo ./agent-code     # From repository
       hb init --openapi ./spec.yaml   # From OpenAPI spec
     """
@@ -54,6 +58,10 @@ cli.add_command(orgs.orgs_group)
 cli.add_command(projects.projects_group)
 cli.add_command(experiments.experiments_group)
 cli.add_command(providers.providers_group)
+cli.add_command(findings.findings_group)
+cli.add_command(api_keys.api_keys_group)
+cli.add_command(members.members_group)
+cli.add_command(campaigns.campaigns_group)
 
 # Register top-level commands
 cli.add_command(init.init_project)
@@ -62,6 +70,8 @@ cli.add_command(logs.logs_command)
 cli.add_command(posture.posture_command)
 cli.add_command(guardrails.guardrails_command)
 cli.add_command(docs.docs_command)
+cli.add_command(coverage.coverage_command)
+cli.add_command(upload_logs.upload_logs_command)
 
 
 # Convenience aliases at top level

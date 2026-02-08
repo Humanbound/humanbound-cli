@@ -5,6 +5,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.prompt import Confirm
 import time
 
 from ..client import HumanboundClient
@@ -337,3 +338,96 @@ def experiment_logs(experiment_id: str, page: int, size: int, result: str):
     except APIError as e:
         console.print(f"[red]Error:[/red] {e}")
         raise SystemExit(1)
+
+
+@experiments_group.command("terminate")
+@click.argument("experiment_id")
+def terminate_experiment(experiment_id: str):
+    """Terminate a running experiment.
+
+    EXPERIMENT_ID: Experiment UUID (or partial ID).
+    """
+    client = HumanboundClient()
+
+    if not client.project_id:
+        console.print("[yellow]No project selected.[/yellow]")
+        console.print("Use 'hb projects use <id>' to select a project first.")
+        raise SystemExit(1)
+
+    try:
+        # Resolve partial ID
+        experiment_id = _resolve_experiment_id(client, experiment_id)
+
+        # Verify experiment is running
+        exp = client.get_experiment(experiment_id)
+        status = exp.get("status", "")
+        if status in TERMINAL_STATUSES:
+            console.print(f"[yellow]Experiment is already {status}.[/yellow]")
+            return
+
+        with console.status("Terminating experiment..."):
+            client.terminate_experiment(experiment_id)
+
+        console.print(f"[green]Experiment terminated.[/green]")
+        console.print(f"[dim]ID: {experiment_id}[/dim]")
+
+    except NotAuthenticatedError:
+        console.print("[red]Not authenticated.[/red] Run 'hb login' first.")
+        raise SystemExit(1)
+    except APIError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
+
+
+@experiments_group.command("delete")
+@click.argument("experiment_id")
+@click.option("--force", is_flag=True, help="Skip confirmation prompt")
+def delete_experiment(experiment_id: str, force: bool):
+    """Delete an experiment.
+
+    EXPERIMENT_ID: Experiment UUID (or partial ID).
+    """
+    client = HumanboundClient()
+
+    if not client.project_id:
+        console.print("[yellow]No project selected.[/yellow]")
+        console.print("Use 'hb projects use <id>' to select a project first.")
+        raise SystemExit(1)
+
+    try:
+        # Resolve partial ID
+        experiment_id = _resolve_experiment_id(client, experiment_id)
+
+        exp = client.get_experiment(experiment_id)
+        exp_name = exp.get("name", experiment_id)
+
+        if not force:
+            if not Confirm.ask(f"Delete experiment [bold]{exp_name}[/bold]? This cannot be undone"):
+                console.print("[dim]Cancelled.[/dim]")
+                return
+
+        with console.status("Deleting experiment..."):
+            client.delete_experiment(experiment_id)
+
+        console.print(f"[green]Experiment deleted.[/green]")
+        console.print(f"[dim]{exp_name} ({experiment_id})[/dim]")
+
+    except NotAuthenticatedError:
+        console.print("[red]Not authenticated.[/red] Run 'hb login' first.")
+        raise SystemExit(1)
+    except APIError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
+
+
+def _resolve_experiment_id(client: HumanboundClient, partial_id: str) -> str:
+    """Resolve a partial experiment ID to full ID."""
+    if len(partial_id) >= 32:
+        return partial_id
+
+    response = client.list_experiments(page=1, size=50)
+    for exp in response.get("data", []):
+        if exp.get("id", "").startswith(partial_id):
+            return exp.get("id")
+
+    return partial_id

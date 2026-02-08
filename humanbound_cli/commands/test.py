@@ -1,6 +1,8 @@
 """Test command for running security experiments."""
 
+import json
 import click
+from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
@@ -47,6 +49,26 @@ LANG_CODE_MAP = {
 }
 
 
+def _load_integration(value: str) -> dict:
+    """Load integration config from JSON string or file path."""
+    path = Path(value)
+    if path.is_file():
+        try:
+            config = json.loads(path.read_text())
+            console.print(f"  [green]\u2713[/green] Loaded config: [dim]{path}[/dim]")
+            return config
+        except json.JSONDecodeError as e:
+            console.print(f"[red]Invalid JSON in {path}:[/red] {e}")
+            raise SystemExit(1)
+
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        console.print(f"[red]--endpoint must be a JSON string or path to a JSON file.[/red]")
+        console.print("[dim]Example: --endpoint ./bot-config.json[/dim]")
+        console.print('[dim]Example: --endpoint \'{"streaming": false, "chat_completion": {"endpoint": "...", "headers": {}, "payload": {"content": "$PROMPT"}}}\'[/dim]')
+        raise SystemExit(1)
+
 
 @click.command("test")
 @click.option(
@@ -74,60 +96,16 @@ LANG_CODE_MAP = {
     "--provider-id",
     help="Provider ID to use (default: first available or default provider)"
 )
-# -- Chat completion endpoint (required for auto-start) --
 @click.option(
-    "--chat-endpoint",
-    help="Chat completion endpoint URL of the bot to test"
+    "--endpoint", "-e",
+    help="Bot integration config — JSON string or path to JSON file. "
+         "Same shape as 'hb init --endpoint'. Overrides the project's default integration."
 )
-@click.option(
-    "--chat-header",
-    multiple=True,
-    help="Header for chat endpoint (format: 'Key: Value'). Repeatable."
-)
-@click.option(
-    "--chat-payload",
-    help="JSON payload template for chat endpoint"
-)
-# -- Thread init endpoint (optional) --
-@click.option(
-    "--init-endpoint",
-    help="Thread initialization endpoint URL"
-)
-@click.option(
-    "--init-header",
-    multiple=True,
-    help="Header for init endpoint (format: 'Key: Value'). Repeatable."
-)
-@click.option(
-    "--init-payload",
-    help="JSON payload template for init endpoint"
-)
-# -- Auth endpoint (optional) --
-@click.option(
-    "--auth-endpoint",
-    help="Auth endpoint URL (for session/token auth before testing)"
-)
-@click.option(
-    "--auth-header",
-    multiple=True,
-    help="Header for auth endpoint (format: 'Key: Value'). Repeatable."
-)
-@click.option(
-    "--auth-payload",
-    help="JSON payload for auth endpoint"
-)
-# -- Behaviour flags --
 @click.option(
     "--adaptive",
     is_flag=True,
     default=False,
     help="Enable adaptive mode (evolutionary attack strategy). Works with owasp_multi_turn and owasp_agentic_multi_turn."
-)
-@click.option(
-    "--streaming",
-    is_flag=True,
-    default=False,
-    help="Enable streaming mode (requires wss:// chat endpoint)"
 )
 @click.option(
     "--no-auto-start",
@@ -146,27 +124,22 @@ LANG_CODE_MAP = {
     help="Exit with error if findings of this severity or higher are found"
 )
 def test_command(test_category: str, testing_level: str, name: str, lang: str,
-                 provider_id: str,
-                 chat_endpoint: str, chat_header: tuple, chat_payload: str,
-                 init_endpoint: str, init_header: tuple, init_payload: str,
-                 auth_endpoint: str, auth_header: tuple, auth_payload: str,
-                 adaptive: bool, streaming: bool, no_auto_start: bool,
+                 provider_id: str, endpoint: str,
+                 adaptive: bool, no_auto_start: bool,
                  wait: bool, fail_on: str):
     """Run security tests on the current project.
 
-    Creates and starts a new experiment with the specified configuration.
-    Each endpoint (chat, init, auth) can have its own headers and payload.
+    Creates and starts a new experiment. Uses the project's default
+    integration (set during 'hb init --endpoint'). Override with -e.
 
     \b
     Examples:
-      hb test --chat-endpoint https://bot.example.com/chat --chat-header "x-api-key: sk-..."
-      hb test --chat-endpoint https://bot.example.com/chat --init-endpoint https://bot.example.com/start
-      hb test --chat-endpoint https://bot.example.com/chat \\
-        --chat-header "Authorization: Bearer token" \\
-        --chat-payload '{"model": "gpt-4", "content": "$PROMPT"}' \\
-        --auth-endpoint https://bot.example.com/auth \\
-        --auth-payload '{"client_id": "xxx"}'
-      hb test --wait --fail-on=high             # CI/CD mode
+      hb test                                     # Uses project's default integration
+      hb test -e ./bot-config.json                # Override with config file
+      hb test -t humanbound/adversarial/owasp_single_turn
+      hb test --adaptive                          # Evolutionary attack mode
+      hb test --wait --fail-on=high               # CI/CD mode
+      hb test --no-auto-start                     # Manual mode (create only)
     """
     client = HumanboundClient()
 
@@ -210,65 +183,13 @@ def test_command(test_category: str, testing_level: str, name: str, lang: str,
             provider_id = provider.get("id")
             console.print(f"  Provider: {provider.get('name', 'unknown').upper()} ({provider_id})")
 
-        # Parse headers from "Key: Value" tuples into dicts
-        def _parse_headers(header_tuples):
-            headers = {}
-            for h in header_tuples:
-                if ":" in h:
-                    key, value = h.split(":", 1)
-                    headers[key.strip()] = value.strip()
-            return headers
-
-        # Parse JSON payload strings
-        def _parse_payload(payload_str):
-            if not payload_str:
-                return {}
-            try:
-                import json
-                return json.loads(payload_str)
-            except json.JSONDecodeError:
-                console.print(f"[red]Invalid JSON payload:[/red] {payload_str[:80]}")
-                raise SystemExit(1)
-
-        parsed_chat_headers = _parse_headers(chat_header)
-        parsed_init_headers = _parse_headers(init_header)
-        parsed_auth_headers = _parse_headers(auth_header)
-
-        parsed_chat_payload = _parse_payload(chat_payload)
-        parsed_init_payload = _parse_payload(init_payload)
-        parsed_auth_payload = _parse_payload(auth_payload)
-
         # Build configuration
-        auto_start = not no_auto_start
-        chat_ep = chat_endpoint or ""
-        init_ep = init_endpoint or ""
-        auth_ep = auth_endpoint or ""
-
-        if auto_start and not chat_ep and not init_ep:
-            console.print("[red]Endpoint required.[/red] Provide --chat-endpoint for the bot to test.")
-            console.print("[dim]Or use --no-auto-start for manual mode.[/dim]")
-            raise SystemExit(1)
-
-        configuration = {
-            "integration": {
-                "streaming": streaming,
-                "thread_auth": {
-                    "endpoint": auth_ep,
-                    "headers": parsed_auth_headers,
-                    "payload": parsed_auth_payload,
-                },
-                "thread_init": {
-                    "endpoint": init_ep,
-                    "headers": parsed_init_headers,
-                    "payload": parsed_init_payload,
-                },
-                "chat_completion": {
-                    "endpoint": chat_ep,
-                    "headers": parsed_chat_headers,
-                    "payload": parsed_chat_payload,
-                },
-            }
-        }
+        configuration = {}
+        if endpoint:
+            integration = _load_integration(endpoint)
+            configuration["integration"] = integration
+        # When no --endpoint is provided, configuration stays {} and the
+        # backend falls back to project.default_integration (set by hb init).
 
         # Create experiment
         experiment_data = {
@@ -278,7 +199,7 @@ def test_command(test_category: str, testing_level: str, name: str, lang: str,
             "lang": lang,
             "provider_id": provider_id,
             "configuration": configuration,
-            "auto_start": auto_start,
+            "auto_start": not no_auto_start,
             "adaptive_mode": adaptive,
         }
 
@@ -294,8 +215,9 @@ def test_command(test_category: str, testing_level: str, name: str, lang: str,
             console.print(f"[red]No experiment ID in response:[/red] {response}")
             raise SystemExit(1)
 
-        console.print(f"[green]✓[/green] Experiment created: {experiment_id}")
-        console.print(f"[green]✓[/green] Experiment started")
+        console.print(f"[green]\u2713[/green] Experiment created: {experiment_id}")
+        if not no_auto_start:
+            console.print(f"[green]\u2713[/green] Experiment started")
 
         # Estimate time
         time_estimates = {

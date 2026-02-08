@@ -377,7 +377,7 @@ def _run_quick_scan(client: HumanboundClient, project_id: str, default_integrati
 
     if not default_integration:
         console.print("[yellow]No bot integration configured on this project.[/yellow]")
-        console.print("[dim]Run 'hb test --chat-endpoint <url>' to test manually.[/dim]")
+        console.print("[dim]Run 'hb test -e ./bot-config.json' to test manually.[/dim]")
         return
 
     try:
