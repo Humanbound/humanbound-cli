@@ -507,6 +507,127 @@
             text-decoration: underline;
         }
 
+        /* Platform Overview — Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: border-color 0.2s, transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+
+        .feature-card .card-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .feature-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Platform Overview — How it Works */
+        .how-it-works {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin: 3rem 0;
+        }
+
+        .how-it-works .step {
+            flex: 1;
+            text-align: center;
+            max-width: 280px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-orange);
+            color: var(--primary-dark);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .step h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .step code {
+            background: var(--code-bg);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Platform Overview — Config Example */
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .config-table th,
+        .config-table td {
+            text-align: left;
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .config-table th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .config-table code {
+            background: var(--code-bg);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             main {
@@ -573,6 +694,24 @@
                 grid-template-columns: 1fr;
             }
 
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .how-it-works {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .config-table {
+                font-size: 0.8rem;
+            }
+
+            .config-table th,
+            .config-table td {
+                padding: 0.4rem 0.6rem;
+            }
+
             .back-to-top {
                 bottom: 1rem;
                 right: 1rem;
@@ -607,6 +746,7 @@
             <nav>
                 <ul>
                     <li><a href="#hero">Home</a></li>
+                    <li><a href="#platform">Platform Overview</a></li>
                     <li><a href="#installation">Installation</a></li>
                     <li><a href="#quick-start">Quick Start</a></li>
                     <li><a href="#bot-config">Bot Configuration File</a></li>
@@ -632,7 +772,10 @@
         <main>
             <section id="hero" class="hero">
                 <h1>Humanbound CLI</h1>
-                <p>Security test your AI agents from the terminal.</p>
+                <p>Find vulnerabilities in your AI agents before attackers do.</p>
+                <p style="color: var(--text-secondary); font-size: 1rem; max-width: 640px; margin: 0.75rem auto 0;">
+                    Automated adversarial and behavioral testing for chatbots and AI agents. OWASP-aligned attack scenarios, posture scoring, and guardrails export &mdash; from your terminal to your CI/CD pipeline.
+                </p>
 
                 <div class="hero-code">
                     <div><span class="cmd">pip install humanbound-cli</span></div>
@@ -643,7 +786,167 @@
                     <div><span class="cmd-prompt">$ </span><span class="cmd">hb posture</span></div>
                 </div>
 
-                <a href="#installation" class="cta-button">Get Started</a>
+                <a href="#platform" class="cta-button">Get Started</a>
+            </section>
+
+            <section id="platform">
+                <h2>What is Humanbound?</h2>
+                <p>
+                    Humanbound is an AI agent security testing platform. Point it at your bot's endpoint, define the scope (or let it auto-extract one), and get structured findings mapped to OWASP LLM &amp; Agentic AI categories. Works with any chatbot or agent &mdash; cloud or on-prem.
+                </p>
+
+                <div class="feature-grid">
+                    <a href="#quick-start" class="feature-card">
+                        <span class="card-icon">&#x1F6E1;</span>
+                        <h4>Adversarial Testing</h4>
+                        <p>OWASP-aligned attack scenarios: prompt injection, jailbreaks, tool abuse, data exfiltration. Single-turn, multi-turn, and agentic modes.</p>
+                    </a>
+                    <a href="#quick-start" class="feature-card">
+                        <span class="card-icon">&#x2705;</span>
+                        <h4>Behavioral Testing</h4>
+                        <p>Validate intent boundaries, response quality, and functional correctness against your bot's defined scope.</p>
+                    </a>
+                    <a href="#test-reference" class="feature-card">
+                        <span class="card-icon">&#x1F9EC;</span>
+                        <h4>Adaptive Attacks</h4>
+                        <p>Evolutionary red-teaming powered by genetic algorithms. Attack strategies adapt based on bot responses.</p>
+                    </a>
+                    <a href="#security-posture" class="feature-card">
+                        <span class="card-icon">&#x1F4CA;</span>
+                        <h4>Security Posture</h4>
+                        <p>Quantified 0&ndash;100 score with grade (A&ndash;F). Tracks findings, coverage, and resilience over time.</p>
+                    </a>
+                    <a href="#findings" class="feature-card">
+                        <span class="card-icon">&#x1F50D;</span>
+                        <h4>Findings &amp; Tracking</h4>
+                        <p>Persistent vulnerability records with lifecycle (open &rarr; stale &rarr; fixed &rarr; regressed). Deduplicated across experiments.</p>
+                    </a>
+                    <a href="#guardrails" class="feature-card">
+                        <span class="card-icon">&#x1F512;</span>
+                        <h4>Guardrails Export</h4>
+                        <p>Generate protection rules from test findings. Export to OpenAI, Humanbound Firewall, or custom format.</p>
+                    </a>
+                    <a href="#campaigns" class="feature-card">
+                        <span class="card-icon">&#x1F504;</span>
+                        <h4>Continuous Assurance</h4>
+                        <p>ASCAM 5-phase lifecycle: Reconnaissance &rarr; Hardening &rarr; Red Teaming &rarr; Analysis &rarr; Monitoring. Runs automatically.</p>
+                    </a>
+                    <a href="#cicd" class="feature-card">
+                        <span class="card-icon">&#x2699;</span>
+                        <h4>CI/CD &amp; pytest</h4>
+                        <p>Block insecure deployments with exit codes. Native pytest plugin with markers, fixtures, and baseline comparison.</p>
+                    </a>
+                </div>
+
+                <h3>How it Works</h3>
+                <div class="how-it-works">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h4>Scan</h4>
+                        <p><code>hb init</code> extracts scope &amp; risk profile from your bot</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h4>Test</h4>
+                        <p><code>hb test</code> runs adversarial + behavioral attacks</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h4>Harden</h4>
+                        <p>Review findings, export guardrails, track posture</p>
+                    </div>
+                </div>
+
+                <h3>Continuous Assurance Engine</h3>
+                <p>
+                    Humanbound doesn't just run one-off tests. Under the hood, the <strong>ASCAM</strong> (AI Security Continuous Assurance Model) engine cycles through five phases &mdash; reconnaissance, hardening, red-teaming, analysis, and monitoring &mdash; adapting automatically to changes in your bot's behavior.
+                </p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Inspired by coverage-guided fuzzing (AFL-style), ASCAM uses coverage tracking to prioritize unexplored attack surfaces, genetic algorithms to evolve attack populations, statistical drift detection to spot behavioral regressions, and a findings lifecycle to deduplicate and track vulnerabilities across runs. The result is an always-on feedback loop that gets smarter with every test cycle.
+                </p>
+
+                <h3>Bot Configuration in 30 Seconds</h3>
+                <p>
+                    Create a JSON file that tells Humanbound how to talk to your bot. The <code>$PROMPT</code> placeholder is where Humanbound injects test prompts during testing &mdash; just place it where your bot expects user input.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>{
+  "streaming": false,
+  "thread_auth": {
+    "endpoint": "https://your-bot.com/oauth/token",
+    "headers": {},
+    "payload": {
+      "client_id": "YOUR_CLIENT_ID",
+      "client_secret": "YOUR_CLIENT_SECRET"
+    }
+  },
+  "thread_init": {
+    "endpoint": "https://your-bot.com/threads",
+    "headers": {},
+    "payload": {}
+  },
+  "chat_completion": {
+    "endpoint": "https://your-bot.com/chat",
+    "headers": {
+      "Authorization": "Bearer YOUR_API_KEY",
+      "Content-Type": "application/json"
+    },
+    "payload": {
+      "messages": [{"role": "user", "content": "$PROMPT"}]
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <table class="config-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>chat_completion</code></td>
+                            <td>Yes</td>
+                            <td>The endpoint your bot listens on for chat messages. Use <code>$PROMPT</code> in the payload where user input goes.</td>
+                        </tr>
+                        <tr>
+                            <td><code>thread_auth</code></td>
+                            <td>No</td>
+                            <td>OAuth/token endpoint called before testing begins. The response payload (<code>access_token</code>, <code>refresh_token</code>, etc.) is captured and injected into subsequent <code>thread_init</code> and <code>chat_completion</code> requests.</td>
+                        </tr>
+                        <tr>
+                            <td><code>thread_init</code></td>
+                            <td>Yes</td>
+                            <td>Session/thread creation endpoint. Called once per conversation to initialize a thread before sending chat messages.</td>
+                        </tr>
+                        <tr>
+                            <td><code>streaming</code></td>
+                            <td>No</td>
+                            <td>Set <code>true</code> if your bot uses WebSocket/SSE streaming.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="alert alert-info">
+                    <strong>Minimal config:</strong> <code>chat_completion</code> and <code>thread_init</code> are required. Skip <code>thread_auth</code> if your bot uses simple API key auth and doesn't need OAuth.
+                </div>
+
+                <p style="margin-top: 1.5rem;">Then point Humanbound at it:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code>hb init -n "My Bot" -e ./bot-config.json    # Create project
+hb test                                      # Run tests (uses saved config)</code></pre>
+                    </div>
+                </div>
             </section>
 
             <section id="installation">
@@ -901,7 +1204,7 @@ hb posture</code></pre>
                 <h3>Configuration Fields</h3>
                 <ul>
                     <li><strong><code>chat_completion</code></strong> (required) -- The endpoint your bot listens on for chat messages. This is the only required section.</li>
-                    <li><strong><code>thread_init</code></strong> (optional) -- For bots that require a thread or session to be created before sending messages.</li>
+                    <li><strong><code>thread_init</code></strong> (required) -- Thread or session creation endpoint, called once per conversation before sending messages.</li>
                     <li><strong><code>thread_auth</code></strong> (optional) -- For bots that require authentication (e.g., OAuth token exchange) before testing can begin.</li>
                     <li><strong><code>$PROMPT</code></strong> -- The placeholder in the payload that gets replaced with each test prompt at runtime.</li>
                     <li><strong><code>streaming</code></strong> -- Set to <code>true</code> for WebSocket/SSE streaming endpoints.</li>
