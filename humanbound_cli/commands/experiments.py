@@ -113,18 +113,25 @@ def show_experiment(experiment_id: str):
 
         results = exp.get("results", {})
         if results and results.get("insights"):
-            console.print("\n[bold]Results:[/bold]")
-            stats = results.get("stats", {})
-            if stats:
-                console.print(f"  Total logs: {stats.get('total', 0)}")
-                console.print(f"  Pass: {stats.get('pass', 0)}")
-                console.print(f"  Fail: {stats.get('fail', 0)}")
-
             insights = results.get("insights", [])
-            if insights:
-                console.print(f"\n  Insights: {len(insights)} findings")
-                for i, insight in enumerate(insights[:3], 1):
-                    console.print(f"    {i}. {insight.get('explanation', '')[:80]}...")
+            error_insights = [i for i in insights if i.get("result") == "error"]
+
+            if status == "Failed" and error_insights:
+                console.print("\n[bold red]Failure Details:[/bold red]")
+                for insight in error_insights:
+                    console.print(f"  {insight.get('explanation', 'Unknown error')}")
+            else:
+                console.print("\n[bold]Results:[/bold]")
+                stats = results.get("stats", {})
+                if stats:
+                    console.print(f"  Total logs: {stats.get('total', 0)}")
+                    console.print(f"  Pass: {stats.get('pass', 0)}")
+                    console.print(f"  Fail: {stats.get('fail', 0)}")
+
+                if insights:
+                    console.print(f"\n  Insights: {len(insights)} findings")
+                    for i, insight in enumerate(insights[:3], 1):
+                        console.print(f"    {i}. {insight.get('explanation', '')[:80]}...")
 
     except NotAuthenticatedError:
         console.print("[red]Not authenticated.[/red] Run 'hb login' first.")
@@ -153,6 +160,8 @@ def experiment_status(experiment_id: str, watch: bool, interval: int):
         if not watch:
             status = client.get_experiment_status(experiment_id)
             _print_status(status)
+            if status.get("status") == "Failed":
+                _show_failure_details(client, experiment_id)
             return
 
         # Watch mode
@@ -180,6 +189,7 @@ def experiment_status(experiment_id: str, watch: bool, interval: int):
             console.print("\n[green]Experiment completed successfully![/green]")
         else:
             console.print(f"\n[red]Experiment ended with status: {current_status}[/red]")
+            _show_failure_details(client, experiment_id)
 
     except NotAuthenticatedError:
         console.print("[red]Not authenticated.[/red] Run 'hb login' first.")
@@ -206,6 +216,28 @@ def _print_status(status: dict):
 
 
 TERMINAL_STATUSES = ["Finished", "Failed"]
+
+
+def _show_failure_details(client: HumanboundClient, experiment_id: str):
+    """Fetch and display failure details for a failed experiment."""
+    try:
+        exp = client.get_experiment(experiment_id)
+        results = exp.get("results", {})
+        insights = results.get("insights", [])
+        error_insights = [i for i in insights if i.get("result") == "error"]
+
+        if error_insights:
+            console.print("\n[bold red]Failure Details:[/bold red]")
+            for insight in error_insights:
+                console.print(f"  {insight.get('explanation', 'Unknown error')}")
+        elif insights:
+            console.print("\n[bold red]Failure Details:[/bold red]")
+            for insight in insights[:3]:
+                explanation = insight.get("explanation", "")
+                if explanation:
+                    console.print(f"  {explanation}")
+    except Exception:
+        pass  # Don't fail the status display if we can't fetch details
 
 
 @experiments_group.command("wait")
@@ -260,6 +292,7 @@ def experiment_wait(experiment_id: str, timeout: int):
                     return
                 else:
                     console.print(f"[red]Experiment ended: {current_status}[/red]")
+                    _show_failure_details(client, experiment_id)
                     raise SystemExit(1)
 
             time.sleep(poll_interval)

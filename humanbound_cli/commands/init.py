@@ -13,7 +13,7 @@ import json
 
 from ..client import HumanboundClient
 from ..config import LONG_TIMEOUT
-from ..exceptions import NotAuthenticatedError, APIError
+from ..exceptions import NotAuthenticatedError, APIError, ServeError, TunnelError
 
 SCAN_TIMEOUT = 180
 
@@ -77,10 +77,11 @@ _PLAYFUL_MESSAGES = [
 @click.option("--endpoint", "-e", help="Bot integration config — JSON string or path to JSON file (maps to 'endpoint' source). Same shape as experiment configuration.integration: {streaming, thread_auth, thread_init, chat_completion}")
 @click.option("--repo", "-r", type=click.Path(exists=True), help="Path to repository to scan (maps to 'agentic' or 'text' source)")
 @click.option("--openapi", "-o", type=click.Path(exists=True), help="Path to OpenAPI spec file (maps to 'text' source)")
+@click.option("--serve", "-s", is_flag=True, help="Launch repo bot locally and probe live (requires --repo)")
 @click.option("--description", "-d", help="Project description")
 @click.option("--yes", "-y", is_flag=True, help="Auto-confirm project creation and set as current project (no interactive prompts)")
 @click.option("--timeout", "-t", type=int, default=SCAN_TIMEOUT, show_default=True, help="Scan request timeout in seconds")
-def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, openapi: str, description: str, yes: bool, timeout: int):
+def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, openapi: str, serve: bool, description: str, yes: bool, timeout: int):
     """Initialize a new project with automatic scope extraction.
 
     Calls POST /scan with one or more sources, displays the extracted scope
@@ -93,6 +94,12 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
       --endpoint, -e   Bot API config (JSON/file) -> 'endpoint' source (API probing)
       --repo, -r       Repository path            -> 'agentic' or 'text' source
       --openapi, -o    OpenAPI spec file           -> 'text' source
+
+    \b
+    Live probing:
+      --serve, -s      Launch the bot from --repo, tunnel it, and probe live.
+                       Combines static analysis (agentic source) with live
+                       endpoint probing for the richest scope extraction.
 
     The --endpoint flag accepts the same JSON shape as experiment
     configuration.integration (inline or file path):
@@ -111,7 +118,7 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
     hb init -n "My Bot" --prompt ./system_prompt.txt
     hb init -n "My Bot" --url https://mybot.example.com
     hb init -n "My Bot" --endpoint ./bot-config.json
-    hb init -n "My Bot" --endpoint '{"streaming": false, ...}'
+    hb init -n "My Bot" --repo ./my-bot --serve
     hb init -n "My Bot" --prompt ./system.txt --endpoint ./bot-config.json
     hb init -n "My Bot" --endpoint ./config.json -y
     """
@@ -126,6 +133,11 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
         console.print("Use 'hb switch <id>' to select an organisation first.")
         raise SystemExit(1)
 
+    # Validate --serve requires --repo
+    if serve and not repo:
+        console.print("[red]--serve requires --repo.[/red] Provide a repository path.")
+        raise SystemExit(1)
+
     # Count extraction sources
     source_flags = [prompt, url, endpoint, repo, openapi]
     if not any(source_flags):
@@ -135,10 +147,15 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
 
     console.print(f"\n[bold]Initializing project:[/bold] {name}\n")
 
+    # Track serve resources for cleanup
+    _server = None
+    _tunnel = None
+
     try:
         # -- Build sources array for POST /scan --------------------------------
         sources = []
         text_parts = []  # accumulate text sources to merge
+        runtime_info = None  # populated if a runnable bot is detected
 
         # --prompt -> text source
         if prompt:
@@ -162,7 +179,7 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
             if scan_result:
                 files = scan_result.get("files", [])
                 if scan_result.get("tools"):
-                    console.print(f"  [green]\u2713[/green] Repository: {len(files)} files, {len(scan_result['tools'])} tools")
+                    console.print(f"  [green]\u2713[/green] Repository: {len(files)} files, {len(scan_result['tools'])} tools (source: agentic)")
                     sources.append({
                         "source": "agentic",
                         "data": {
@@ -179,6 +196,17 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
                         text_parts.append(combined)
             else:
                 console.print(f"  [yellow]![/yellow] Repository: no relevant files found")
+
+            # -- Runtime detection (for --serve or interactive prompt) ----------
+            runtime_info = _detect_runtime(repo)
+
+            if runtime_info and not serve and not endpoint and not yes:
+                # Interactive: offer to launch for live probing
+                console.print()
+                console.print(f"  [cyan]i[/cyan] Detected runnable bot: [bold]{runtime_info.framework.title()}[/bold] ({runtime_info.entry_point})")
+                console.print(f"    Start command: [dim]{runtime_info.start_cmd.replace('{port}', str(runtime_info.port))}[/dim]")
+                if Confirm.ask("    Launch it for live probing?", default=False):
+                    serve = True
 
         # --openapi -> text source
         if openapi:
@@ -207,6 +235,18 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
             chat_ep = bot_config.get("chat_completion", {}).get("endpoint", "")
             console.print(f"  [green]\u2713[/green] Endpoint source: [dim]{chat_ep or '(from config)'}[/dim]")
             sources.append({"source": "endpoint", "data": bot_config})
+
+        # -- Serve lifecycle: start server + tunnel ----------------------------
+        if serve and repo:
+            if not runtime_info:
+                console.print("[yellow]Could not detect a runnable bot in the repository.[/yellow]")
+                console.print("[dim]Continuing with static analysis only.[/dim]")
+            else:
+                _server, _tunnel, serve_source = _start_serve(
+                    client, repo, runtime_info, yes
+                )
+                if serve_source:
+                    sources.append(serve_source)
 
         # Merge accumulated text parts into a single text source
         if text_parts:
@@ -312,6 +352,9 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
     except APIError as e:
         console.print(f"[red]Error:[/red] {e}")
         raise SystemExit(1)
+    finally:
+        # Clean up serve resources
+        _cleanup_serve(_tunnel, _server)
 
 
 # -- Scan with rotating progress -----------------------------------------------
@@ -445,6 +488,117 @@ def _start_discovery(client: HumanboundClient, project_id: str):
     except APIError as e:
         console.print(f"[red]Could not start discovery:[/red] {e}")
         console.print("[dim]Run 'hb test' to start tests manually.[/dim]")
+
+
+# -- Serve helpers --------------------------------------------------------------
+
+
+def _detect_runtime(repo_path: str):
+    """Try to detect a runnable bot in the repository. Returns RuntimeInfo or None."""
+    try:
+        from ..serve.runtime_detector import RuntimeDetector
+        detector = RuntimeDetector(repo_path)
+        return detector.detect()
+    except Exception:
+        return None
+
+
+def _start_serve(client, repo_path: str, runtime_info, yes: bool):
+    """Start local server + tunnel, return (server, tunnel, endpoint_source) or (None, None, None).
+
+    Shows cost warning before proceeding. On failure, prints warning and
+    returns None — the caller continues with static-only analysis.
+    """
+    from ..serve.local_server import LocalServer
+    from ..serve.tunnel_client import TunnelClient
+    from ..serve.config_builder import build_bot_config
+
+    # Cost warning (mandatory unless --yes)
+    if not yes:
+        console.print()
+        console.print(Panel(
+            "Your bot's LLM provider will be called during probing.\n"
+            "The discovery conversation uses ~7 turns.\n"
+            "Typical cost: $0.01-$0.10 depending on your model.\n\n"
+            "Make sure your bot's API key (e.g. OPENAI_API_KEY) is set\n"
+            "in your environment or in a .env file in the repository.",
+            title="Cost Warning",
+            border_style="yellow",
+        ))
+        if not Confirm.ask("Continue with live probing?", default=True):
+            console.print("[dim]Skipping live probing.[/dim]")
+            return None, None, None
+
+    # Warn about missing .env if .env.example exists
+    if runtime_info.env_file:
+        env_path = Path(repo_path) / ".env"
+        if not env_path.is_file():
+            console.print(f"  [yellow]![/yellow] Found {runtime_info.env_file} but no .env — your bot may need environment variables")
+
+    # Install dependencies
+    server = LocalServer(runtime_info, repo_path)
+
+    if runtime_info.install_cmd:
+        do_install = yes or Confirm.ask(
+            f"  Install dependencies? [dim]({runtime_info.install_cmd})[/dim]",
+            default=True,
+        )
+        if do_install:
+            try:
+                with console.status(f"[dim]Installing dependencies...[/dim]"):
+                    server.install_deps()
+                console.print(f"  [green]\u2713[/green] Dependencies installed")
+            except ServeError as e:
+                console.print(f"[yellow]Dependency install failed:[/yellow] {e}")
+                console.print("[dim]Continuing with static analysis only.[/dim]")
+                return None, None, None
+
+    # Start server
+    try:
+        with console.status(f"[dim]Starting {runtime_info.framework} server on port {server.port}...[/dim]"):
+            server.start()
+        console.print(f"  [green]\u2713[/green] Server started on port {server.port}")
+    except ServeError as e:
+        console.print(f"[yellow]Server failed to start:[/yellow] {e}")
+        console.print("[dim]Continuing with static analysis only.[/dim]")
+        return None, None, None
+
+    # Connect tunnel
+    tunnel = None
+    try:
+        tunnel = TunnelClient(
+            local_port=server.port,
+            api_token=client._api_token,
+        )
+        with console.status("[dim]Connecting tunnel...[/dim]"):
+            public_url = tunnel.connect()
+        console.print(f"  [green]\u2713[/green] Tunnel: [dim]{public_url}[/dim]")
+    except (TunnelError, Exception) as e:
+        console.print(f"[yellow]Tunnel connection failed:[/yellow] {e}")
+        console.print("[dim]Continuing with static analysis only.[/dim]")
+        server.stop()
+        return None, None, None
+
+    # Build endpoint source
+    bot_config = build_bot_config(public_url, runtime_info)
+    chat_ep = bot_config.get("chat_completion", {}).get("endpoint", "")
+    console.print(f"  [green]\u2713[/green] Endpoint source: [dim]{chat_ep}[/dim]")
+
+    return server, tunnel, {"source": "endpoint", "data": bot_config}
+
+
+def _cleanup_serve(tunnel, server):
+    """Safely disconnect tunnel and stop server."""
+    if tunnel:
+        try:
+            tunnel.disconnect()
+        except Exception:
+            pass
+    if server:
+        try:
+            server.stop()
+        except Exception:
+            pass
 
 
 # -- Helpers --------------------------------------------------------------------

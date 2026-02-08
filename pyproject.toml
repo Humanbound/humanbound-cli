@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "humanbound-cli"
-version = "0.2.0"
+version = "0.3.0"
 authors = [
   { name="Kostas Siabanis", email="hello@humanbound.ai" },
   { name="Demetris Gerogiannis", email="hello@humanbound.ai" },
@@ -29,6 +29,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+serve = [
+    "websockets>=12.0",
+]
 pytest = [
     "pytest>=7.0.0",
 ]

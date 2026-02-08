@@ -56,3 +56,21 @@ class ConfigurationError(HumanboundError):
     """Raised when SDK configuration is invalid."""
 
     pass
+
+
+class ServeError(HumanboundError):
+    """Raised when the local server fails to start or crashes."""
+
+    pass
+
+
+class RuntimeDetectionError(HumanboundError):
+    """Raised when the runtime detector cannot identify the project type."""
+
+    pass
+
+
+class TunnelError(HumanboundError):
+    """Raised when the tunnel connection to the relay fails."""
+
+    pass

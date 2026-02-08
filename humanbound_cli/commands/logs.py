@@ -220,13 +220,21 @@ def _export_json(client: HumanboundClient, experiment_id: str, output: str, verd
 def _export_html(client: HumanboundClient, experiment_id: str, output: str):
     """Export logs as HTML report."""
     with console.status("Generating HTML report...", spinner="dots"):
-        report_html = client.get_experiment_report(experiment_id)
+        experiment = client.get_experiment(experiment_id)
 
-    if output:
-        Path(output).write_text(report_html)
-        console.print(f"[green]HTML report exported to:[/green] {output}")
-    else:
-        # Default filename
-        filename = f"experiment_{experiment_id}_report.html"
-        Path(filename).write_text(report_html)
-        console.print(f"[green]HTML report exported to:[/green] {filename}")
+        # Fetch all logs
+        all_logs = []
+        page = 1
+        while True:
+            resp = client.get_experiment_logs(experiment_id, page=page, size=100)
+            all_logs.extend(resp.get("data", []))
+            if not resp.get("has_next_page"):
+                break
+            page += 1
+
+        from ..report import generate_html_report
+        report_html = generate_html_report(experiment, all_logs)
+
+    filename = output or f"experiment_{experiment_id[:8]}_report.html"
+    Path(filename).write_text(report_html)
+    console.print(f"[green]HTML report exported to:[/green] {filename}")

@@ -1435,7 +1435,13 @@ hb experiments logs &lt;id&gt;
 
 <span class="comment"># Filter by result</span>
 hb experiments logs &lt;id&gt; --result fail
-hb experiments logs &lt;id&gt; --result pass</code></pre>
+hb experiments logs &lt;id&gt; --result pass
+
+<span class="comment"># Export branded HTML report</span>
+hb logs &lt;id&gt; --format html -o report.html
+
+<span class="comment"># Export as JSON</span>
+hb logs &lt;id&gt; --format json --all -o results.json</code></pre>
                     </div>
                 </div>
 
@@ -2238,7 +2244,7 @@ hb docs quickstart</code></pre>
                     <div class="command-grid">
                         <div class="command-card">
                             <h4>hb logs</h4>
-                            <p>View logs from latest experiment</p>
+                            <p>View logs from latest experiment (table, json, or html report)</p>
                         </div>
                         <div class="command-card">
                             <h4>hb posture</h4>
@@ -2360,8 +2366,8 @@ hb docs quickstart</code></pre>
         <p>Copyright 2025 Humanbound. Apache-2.0 License.</p>
         <p>
             <a href="https://github.com/humanbound" target="_blank">GitHub</a>
-            <a href="https://docs.humanbound.com" target="_blank">Documentation</a>
-            <a href="https://github.com/humanbound/issues" target="_blank">Report Issues</a>
+            <a href="https://docs.humanbound.ai" target="_blank">Documentation</a>
+            <a href="https://github.com/Humanbound/humanbound-cli/issues" target="_blank">Report Issues</a>
         </p>
     </footer>
 

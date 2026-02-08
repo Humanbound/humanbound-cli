@@ -7,9 +7,23 @@ from .client import HumanboundClient
 from .config import get_base_url
 
 from .commands import (
-    auth, orgs, projects, experiments, init, test, logs, posture,
-    guardrails, docs, providers, findings, api_keys, members,
-    coverage, campaigns, upload_logs,
+    auth,
+    orgs,
+    projects,
+    experiments,
+    init,
+    test,
+    logs,
+    posture,
+    guardrails,
+    docs,
+    providers,
+    findings,
+    api_keys,
+    members,
+    coverage,
+    campaigns,
+    upload_logs,
 )
 
 console = Console()
@@ -24,7 +38,7 @@ def get_client() -> HumanboundClient:
 @click.option(
     "--base-url",
     envvar="HUMANBOUND_BASE_URL",
-    help="API base URL (default: https://api.aiandme.io)",
+    help="API base URL (default: https://api.humanbound.ai)",
 )
 @click.pass_context
 def cli(ctx, base_url: str):
@@ -159,7 +173,12 @@ def status_alias(ctx, experiment_id: str, watch: bool):
             console.print(f"[red]Error:[/red] {e}")
             raise SystemExit(1)
 
-    ctx.invoke(experiments.experiment_status, experiment_id=experiment_id, watch=watch, interval=10)
+    ctx.invoke(
+        experiments.experiment_status,
+        experiment_id=experiment_id,
+        watch=watch,
+        interval=10,
+    )
 
 
 if __name__ == "__main__":

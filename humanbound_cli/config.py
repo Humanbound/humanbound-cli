@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 # Default API base URL (can be overridden for on-prem deployments)
-DEFAULT_BASE_URL = "https://api.aiandme.io/api"
+DEFAULT_BASE_URL = "https://api.humanbound.ai/api"
 
 # Auth0 configuration for OAuth flow
 AUTH0_DOMAIN = "aiandme.eu.auth0.com"
@@ -18,6 +18,12 @@ TOKEN_FILE = CONFIG_DIR / "credentials.json"
 # API timeout settings (in seconds)
 DEFAULT_TIMEOUT = 30
 LONG_TIMEOUT = 120  # For operations like report generation
+
+# Serve / tunnel settings
+DEFAULT_RELAY_URL = "wss://relay.humanbound.ai/tunnel"
+SERVE_HEALTH_CHECK_TIMEOUT = 60  # seconds to wait for server health
+SERVE_INSTALL_TIMEOUT = 120  # seconds to wait for dep install
+SERVE_PORT_RANGE = (8000, 9000)  # fallback port scan range
 
 
 def get_base_url() -> str:

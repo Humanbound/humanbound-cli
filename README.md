@@ -395,8 +395,11 @@ Options: `--tag`, `--lang`
 ### Results & Export
 
 ```bash
-# View experiment results (table, json, or csv)
-hb logs [experiment_id] [--format table] [--verdict pass|fail] [--page N] [--size N]
+# View experiment results
+hb logs [experiment_id] [--format table|json|html] [--verdict pass|fail] [--page N] [--size N]
+
+# Export branded HTML report
+hb logs <experiment_id> --format=html [-o report.html]
 
 # Security posture
 hb posture [--json] [--trends]

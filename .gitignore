@@ -49,3 +49,9 @@ htmlcov/
 
 # Local tests (not for distribution)
 tests/
+
+# Test repositories for --repo feature testing
+.test-repos/
+
+# Relay service (internal deployment, not for distribution)
+relay/

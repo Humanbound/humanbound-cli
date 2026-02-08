@@ -387,12 +387,9 @@ class HumanboundClient:
         return True
 
     def _exchange_for_api_token(self) -> None:
-        """Exchange Auth0 token for AIandMe API session token."""
-        # Always use production API for auth (token audience must match)
-        auth_base_url = get_auth0_audience()
-
+        """Exchange Auth0 token for API session token."""
         response = requests.get(
-            f"{auth_base_url}/auth",
+            f"{self.base_url}/auth",
             headers={"Authorization": f"Bearer {self._auth0_token}"},
             timeout=DEFAULT_TIMEOUT,
         )
