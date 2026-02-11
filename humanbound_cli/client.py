@@ -206,6 +206,89 @@ ERROR_HTML = """<!DOCTYPE html>
 </html>"""
 
 
+LOGOUT_HTML = """<!DOCTYPE html>
+<html>
+<head>
+    <title>Humanbound CLI - Logged Out</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            max-width: 480px;
+        }
+        .icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1.5rem;
+            background: #58a6ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .icon svg { width: 32px; height: 32px; fill: white; }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #58a6ff;
+        }
+        p {
+            color: #8b949e;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .command {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+        }
+        .command code {
+            color: #7ee787;
+        }
+        .prompt { color: #6e7681; }
+        .close-hint {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #6e7681;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+        </div>
+        <h1>Session Revoked</h1>
+        <p>Your local credentials and browser session have been cleared.</p>
+        <div class="command">
+            <span class="prompt">$</span> <code>hb login</code>
+        </div>
+        <p class="close-hint">You can close this tab</p>
+    </div>
+</body>
+</html>"""
+
+
 class HumanboundClient:
     """API client for Humanbound platform with OAuth authentication."""
 

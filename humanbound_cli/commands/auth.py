@@ -65,20 +65,51 @@ def login(base_url: str, port: int, force: bool):
 
 @auth_group.command("logout")
 @click.option("--revoke", is_flag=True, help="Also clear browser SSO session (opens browser)")
-def logout(revoke: bool):
+@click.option("--port", default=8085, help="Local callback port (default: 8085)")
+def logout(revoke: bool, port: int):
     """Clear stored credentials."""
-    import webbrowser
-    from ..config import get_auth0_domain, get_auth0_client_id
-
     client = HumanboundClient()
     client.logout()  # This already prints the success message
 
     if revoke:
+        import webbrowser
+        import urllib.parse
+        import http.server
+        import socketserver
+        from ..config import get_auth0_domain, get_auth0_client_id
+        from ..client import LOGOUT_HTML
+
         auth0_domain = get_auth0_domain()
         client_id = get_auth0_client_id()
-        logout_url = f"https://{auth0_domain}/v2/logout?client_id={client_id}"
-        console.print("Opening browser to clear Auth0 session...")
-        webbrowser.open(logout_url)
+        return_to = f"http://localhost:{port}"
+
+        logout_url = (
+            f"https://{auth0_domain}/v2/logout?"
+            + urllib.parse.urlencode({"client_id": client_id, "returnTo": return_to})
+        )
+
+        class LogoutHandler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(LOGOUT_HTML.encode())
+
+            def log_message(self, format, *args):
+                pass
+
+        socketserver.TCPServer.allow_reuse_address = True
+        server = socketserver.TCPServer(("", port), LogoutHandler)
+        server.timeout = 30
+
+        try:
+            console.print("Opening browser to clear Auth0 session...")
+            webbrowser.open(logout_url)
+            server.handle_request()
+        finally:
+            server.server_close()
+
+        console.print("[green]Browser session revoked.[/green]")
     else:
         console.print(
             "[dim]Note: Your browser may still have an active Auth0 session. "

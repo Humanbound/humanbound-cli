@@ -98,10 +98,11 @@ def login_alias(ctx):
 
 @cli.command("logout")
 @click.option("--revoke", is_flag=True, help="Also clear browser SSO session (opens browser)")
+@click.option("--port", default=8085, help="Local callback port (default: 8085)")
 @click.pass_context
-def logout_alias(ctx, revoke):
+def logout_alias(ctx, revoke, port):
     """Clear stored credentials (alias for 'auth logout')."""
-    ctx.invoke(auth.logout, revoke=revoke)
+    ctx.invoke(auth.logout, revoke=revoke, port=port)
 
 
 @cli.command("whoami")
