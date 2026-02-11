@@ -97,10 +97,11 @@ def login_alias(ctx):
 
 
 @cli.command("logout")
+@click.option("--revoke", is_flag=True, help="Also clear browser SSO session (opens browser)")
 @click.pass_context
-def logout_alias(ctx):
+def logout_alias(ctx, revoke):
     """Clear stored credentials (alias for 'auth logout')."""
-    ctx.invoke(auth.logout)
+    ctx.invoke(auth.logout, revoke=revoke)
 
 
 @cli.command("whoami")

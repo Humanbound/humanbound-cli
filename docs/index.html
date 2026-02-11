@@ -806,10 +806,10 @@
                         <h4>Behavioral Testing</h4>
                         <p>Validate intent boundaries, response quality, and functional correctness against your bot's defined scope.</p>
                     </a>
-                    <a href="#test-reference" class="feature-card">
+                    <a href="#campaigns" class="feature-card">
                         <span class="card-icon">&#x1F9EC;</span>
-                        <h4>Adaptive Attacks</h4>
-                        <p>Evolutionary red-teaming powered by genetic algorithms. Attack strategies adapt based on bot responses.</p>
+                        <h4>Evolutionary Red Teaming</h4>
+                        <p>Genetic-algorithm-powered attack evolution during ASCAM red-teaming campaigns. Strategies adapt automatically based on bot responses.</p>
                     </a>
                     <a href="#security-posture" class="feature-card">
                         <span class="card-icon">&#x1F4CA;</span>
@@ -1023,14 +1023,6 @@ hb switch &lt;org-id&gt;</code></pre>
                     <strong>Recommended:</strong> Using <code>--endpoint</code> (or <code>-e</code>) during init saves the bot integration as the project's default integration. This means subsequent <code>hb test</code> commands work without specifying endpoints again.
                 </div>
 
-                <h4>From a Live URL (Browser Discovery)</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <div class="code-block">
-                        <pre><code>hb init -n "My Bot" --url https://mybot.example.com</code></pre>
-                    </div>
-                </div>
-
                 <h4>From Repository</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
@@ -1099,14 +1091,6 @@ hb test -l system
 
 <span class="comment"># Comprehensive scan (~90 minutes)</span>
 hb test -l acceptance</code></pre>
-                    </div>
-                </div>
-
-                <h4>Adaptive Mode (Evolutionary Attacks)</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <div class="code-block">
-                        <pre><code>hb test --adaptive</code></pre>
                     </div>
                 </div>
 
@@ -1299,7 +1283,6 @@ hb posture</code></pre>
   --provider-id           Provider to use (default: first available)
 
 <span class="comment">Behavior:</span>
-  --adaptive              Enable adaptive mode (evolutionary attacks)
   --no-auto-start         Create without starting (manual mode)
   -w, --wait              Wait for completion
   --fail-on SEVERITY      Exit non-zero if findings &gt;= severity
@@ -2168,7 +2151,7 @@ hb docs quickstart</code></pre>
                     <div class="command-grid">
                         <div class="command-card">
                             <h4>hb init</h4>
-                            <p>Create new project from prompt, endpoint, URL, repo, or OpenAPI</p>
+                            <p>Create new project from prompt, endpoint, repo, or OpenAPI</p>
                         </div>
                         <div class="command-card">
                             <h4>hb projects list</h4>

@@ -102,12 +102,6 @@ def _load_integration(value: str) -> dict:
          "Same shape as 'hb init --endpoint'. Overrides the project's default integration."
 )
 @click.option(
-    "--adaptive",
-    is_flag=True,
-    default=False,
-    help="Enable adaptive mode (evolutionary attack strategy). Works with owasp_multi_turn and owasp_agentic_multi_turn."
-)
-@click.option(
     "--no-auto-start",
     is_flag=True,
     default=False,
@@ -125,7 +119,7 @@ def _load_integration(value: str) -> dict:
 )
 def test_command(test_category: str, testing_level: str, name: str, lang: str,
                  provider_id: str, endpoint: str,
-                 adaptive: bool, no_auto_start: bool,
+                 no_auto_start: bool,
                  wait: bool, fail_on: str):
     """Run security tests on the current project.
 
@@ -137,7 +131,6 @@ def test_command(test_category: str, testing_level: str, name: str, lang: str,
       hb test                                     # Uses project's default integration
       hb test -e ./bot-config.json                # Override with config file
       hb test -t humanbound/adversarial/owasp_single_turn
-      hb test --adaptive                          # Evolutionary attack mode
       hb test --wait --fail-on=high               # CI/CD mode
       hb test --no-auto-start                     # Manual mode (create only)
     """
@@ -164,8 +157,6 @@ def test_command(test_category: str, testing_level: str, name: str, lang: str,
     console.print(f"\n[bold]Starting security test:[/bold] {name}\n")
     console.print(f"  Category: {test_category}")
     console.print(f"  Level: {testing_level}")
-    if adaptive:
-        console.print(f"  Adaptive: enabled")
     console.print(f"  Language: {lang}")
     console.print()
 
@@ -200,7 +191,6 @@ def test_command(test_category: str, testing_level: str, name: str, lang: str,
             "provider_id": provider_id,
             "configuration": configuration,
             "auto_start": not no_auto_start,
-            "adaptive_mode": adaptive,
         }
 
         with console.status("Creating experiment..."):

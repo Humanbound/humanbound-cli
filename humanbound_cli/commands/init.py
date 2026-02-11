@@ -27,12 +27,6 @@ _SCAN_PHASES = {
         "Exploring capabilities...",
         "Wrapping up conversation...",
     ],
-    "url": [
-        "Opening browser...",
-        "Looking for chat widgets...",
-        "Probing the interface...",
-        "Capturing responses...",
-    ],
     "text": [
         "Reading your prompt...",
     ],
@@ -73,7 +67,6 @@ _PLAYFUL_MESSAGES = [
 @click.command("init")
 @click.option("--name", "-n", required=True, help="Project name")
 @click.option("--prompt", "-p", type=click.Path(exists=True), help="Path to system prompt file (maps to 'text' source)")
-@click.option("--url", "-u", help="Bot URL to probe via browser discovery (maps to 'url' source). Domain must match your email domain")
 @click.option("--endpoint", "-e", help="Bot integration config — JSON string or path to JSON file (maps to 'endpoint' source). Same shape as experiment configuration.integration: {streaming, thread_auth, thread_init, chat_completion}")
 @click.option("--repo", "-r", type=click.Path(exists=True), help="Path to repository to scan (maps to 'agentic' or 'text' source)")
 @click.option("--openapi", "-o", type=click.Path(exists=True), help="Path to OpenAPI spec file (maps to 'text' source)")
@@ -81,7 +74,7 @@ _PLAYFUL_MESSAGES = [
 @click.option("--description", "-d", help="Project description")
 @click.option("--yes", "-y", is_flag=True, help="Auto-confirm project creation and set as current project (no interactive prompts)")
 @click.option("--timeout", "-t", type=int, default=SCAN_TIMEOUT, show_default=True, help="Scan request timeout in seconds")
-def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, openapi: str, serve: bool, description: str, yes: bool, timeout: int):
+def init_project(name: str, prompt: str, endpoint: str, repo: str, openapi: str, serve: bool, description: str, yes: bool, timeout: int):
     """Initialize a new project with automatic scope extraction.
 
     Calls POST /scan with one or more sources, displays the extracted scope
@@ -90,7 +83,6 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
     \b
     Sources (at least one required):
       --prompt, -p     System prompt file         -> 'text' source
-      --url, -u        Live bot URL               -> 'url' source (browser discovery)
       --endpoint, -e   Bot API config (JSON/file) -> 'endpoint' source (API probing)
       --repo, -r       Repository path            -> 'agentic' or 'text' source
       --openapi, -o    OpenAPI spec file           -> 'text' source
@@ -116,7 +108,6 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
 
     \b
     hb init -n "My Bot" --prompt ./system_prompt.txt
-    hb init -n "My Bot" --url https://mybot.example.com
     hb init -n "My Bot" --endpoint ./bot-config.json
     hb init -n "My Bot" --repo ./my-bot --serve
     hb init -n "My Bot" --prompt ./system.txt --endpoint ./bot-config.json
@@ -139,10 +130,10 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
         raise SystemExit(1)
 
     # Count extraction sources
-    source_flags = [prompt, url, endpoint, repo, openapi]
+    source_flags = [prompt, endpoint, repo, openapi]
     if not any(source_flags):
         console.print("[yellow]No extraction source provided.[/yellow]")
-        console.print("Use --prompt, --url, --endpoint, --repo, or --openapi to specify a source.")
+        console.print("Use --prompt, --endpoint, --repo, or --openapi to specify a source.")
         raise SystemExit(1)
 
     console.print(f"\n[bold]Initializing project:[/bold] {name}\n")
@@ -162,11 +153,6 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
             console.print(f"  [green]\u2713[/green] Loaded prompt: [dim]{prompt}[/dim]")
             prompt_text = Path(prompt).read_text()
             text_parts.append(prompt_text)
-
-        # --url -> url source (browser discovery)
-        if url:
-            console.print(f"  [green]\u2713[/green] URL source: [dim]{url}[/dim]")
-            sources.append({"source": "url", "data": {"url": url}})
 
         # --repo -> agentic or text source
         if repo:
@@ -299,7 +285,7 @@ def init_project(name: str, prompt: str, url: str, endpoint: str, repo: str, ope
         with console.status("[dim]Creating project...[/dim]"):
             project_data = {
                 "name": name,
-                "description": description or f"Project created via CLI from {_get_source_description(prompt, url, endpoint, repo, openapi)}",
+                "description": description or f"Project created via CLI from {_get_source_description(prompt, endpoint, repo, openapi)}",
                 "scope": scope,
             }
 
@@ -766,13 +752,11 @@ def _display_dashboard(
     ))
 
 
-def _get_source_description(prompt: str, url: str, endpoint: str, repo: str, openapi: str) -> str:
+def _get_source_description(prompt: str, endpoint: str, repo: str, openapi: str) -> str:
     """Get a description of the sources used."""
     sources = []
     if prompt:
         sources.append(f"prompt ({Path(prompt).name})")
-    if url:
-        sources.append(f"url ({url})")
     if endpoint:
         path = Path(endpoint)
         if path.is_file():
