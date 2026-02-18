@@ -748,7 +748,7 @@
             <div class="logo-section">
                 <img src="https://cdneunorth.blob.core.windows.net/data/humanbound_logo.png" alt="Humanbound Logo">
                 <h1>Documentation</h1>
-                <span class="version-badge">v0.3.5</span>
+                <span class="version-badge">v0.4.1</span>
             </div>
             <div class="hamburger" id="hamburger">
                 <span></span>
@@ -788,6 +788,7 @@
                     <li><a href="#deployment">Deployment Options</a></li>
                     <li><a href="#authentication">Authentication &amp; Context</a></li>
                     <li><a href="#mcp-server">MCP Server</a></li>
+                    <li><a href="#shell-completion">Shell Completion</a></li>
                     <li><a href="#command-reference">Command Reference</a></li>
                     <li><a href="#community">Community</a></li>
                 </ul>
@@ -1261,6 +1262,15 @@ hb switch &lt;org-id&gt;</code></pre>
                     </div>
                 </div>
 
+                <h4>From Repository with Live Probing</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Launch the bot locally, tunnel it, and probe live for richest scope extraction</span>
+hb init -n "My Bot" --repo ./agent-code --serve</code></pre>
+                    </div>
+                </div>
+
                 <h4>From OpenAPI Spec</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
@@ -1276,6 +1286,36 @@ hb switch &lt;org-id&gt;</code></pre>
                         <pre><code>hb init -n "My Bot" --prompt ./prompt.txt --endpoint ./config.json</code></pre>
                     </div>
                 </div>
+
+                <h4>Non-Interactive Mode</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Skip all confirmation prompts (useful for CI/CD)</span>
+hb init -n "My Bot" --endpoint ./config.json -y</code></pre>
+                    </div>
+                </div>
+
+                <h4>Init Options</h4>
+                <table class="config-table">
+                    <thead>
+                        <tr>
+                            <th>Option</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>-n, --name</code></td><td>Project name (required)</td></tr>
+                        <tr><td><code>-p, --prompt</code></td><td>Path to system prompt file</td></tr>
+                        <tr><td><code>-e, --endpoint</code></td><td>Bot integration config (JSON string or file path)</td></tr>
+                        <tr><td><code>-r, --repo</code></td><td>Path to repository to scan</td></tr>
+                        <tr><td><code>-o, --openapi</code></td><td>Path to OpenAPI spec file</td></tr>
+                        <tr><td><code>-s, --serve</code></td><td>Launch repo bot locally, tunnel it, and probe live (requires <code>--repo</code>)</td></tr>
+                        <tr><td><code>-d, --description</code></td><td>Project description</td></tr>
+                        <tr><td><code>-y, --yes</code></td><td>Auto-confirm project creation (no interactive prompts)</td></tr>
+                        <tr><td><code>-t, --timeout</code></td><td>Scan request timeout in seconds (default: 180)</td></tr>
+                    </tbody>
+                </table>
 
                 <p>The <code>--endpoint / -e</code> flag accepts a JSON config file (or inline JSON string) describing your bot's API. See the <a href="#bot-config" style="color: var(--accent-orange);">Bot Configuration File</a> section for the full specification.</p>
 
@@ -1889,7 +1929,11 @@ hb findings update &lt;id&gt; --severity high</code></pre>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <div class="code-block">
-                        <pre><code>hb campaigns break</code></pre>
+                        <pre><code><span class="comment"># Stop with confirmation prompt</span>
+hb campaigns break
+
+<span class="comment"># Skip confirmation</span>
+hb campaigns break --force</code></pre>
                     </div>
                 </div>
 
@@ -2476,14 +2520,21 @@ security-test:
                         <pre><code><span class="comment"># Register a Microsoft connector</span>
 <span class="prompt">$</span> <span class="cmd">hb connectors add --tenant-id &lt;id&gt; --client-id &lt;id&gt; --client-secret</span>
 
+<span class="comment"># Register with explicit vendor and display name</span>
+<span class="prompt">$</span> <span class="cmd">hb connectors add --vendor microsoft --tenant-id &lt;id&gt; --client-id &lt;id&gt; --name "Production"</span>
+
 <span class="comment"># List connectors</span>
 <span class="prompt">$</span> <span class="cmd">hb connectors</span>
+
+<span class="comment"># Export connectors as HTML report</span>
+<span class="prompt">$</span> <span class="cmd">hb connectors --report</span>
 
 <span class="comment"># Test connectivity</span>
 <span class="prompt">$</span> <span class="cmd">hb connectors test &lt;connector-id&gt;</span>
 
-<span class="comment"># Update credentials</span>
+<span class="comment"># Update credentials, name, or status</span>
 <span class="prompt">$</span> <span class="cmd">hb connectors update &lt;connector-id&gt; --client-secret</span>
+<span class="prompt">$</span> <span class="cmd">hb connectors update &lt;connector-id&gt; --name "New Name" --status disabled</span>
 
 <span class="comment"># Remove a connector</span>
 <span class="prompt">$</span> <span class="cmd">hb connectors remove &lt;connector-id&gt;</span></code></pre>
@@ -2499,17 +2550,26 @@ security-test:
                         <pre><code><span class="comment"># List all inventory assets</span>
 <span class="prompt">$</span> <span class="cmd">hb inventory</span>
 
-<span class="comment"># Filter by category, vendor, or risk</span>
-<span class="prompt">$</span> <span class="cmd">hb inventory --category copilot_studio_agent --risk-level high</span>
+<span class="comment"># Export as HTML report</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory --report</span>
 
-<span class="comment"># View asset details</span>
+<span class="comment"># Filter by category, vendor, risk, or sanctioned status</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory --category copilot_studio_agent --risk-level high</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory --vendor microsoft --sanctioned</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory --unsanctioned --risk-level critical</span>
+
+<span class="comment"># View asset details (with optional HTML report)</span>
 <span class="prompt">$</span> <span class="cmd">hb inventory view &lt;asset-id&gt;</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory view &lt;asset-id&gt; --report</span>
 
 <span class="comment"># Update governance fields</span>
 <span class="prompt">$</span> <span class="cmd">hb inventory update &lt;asset-id&gt; --sanctioned --owner "security@company.com"</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory update &lt;asset-id&gt; --department "Engineering" --business-purpose "Customer support"</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory update &lt;asset-id&gt; --has-policy --has-risk-assessment</span>
 
-<span class="comment"># View shadow AI posture</span>
+<span class="comment"># View shadow AI posture (with optional HTML report)</span>
 <span class="prompt">$</span> <span class="cmd">hb inventory posture</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory posture --report</span>
 
 <span class="comment"># Onboard an asset into a security testing project</span>
 <span class="prompt">$</span> <span class="cmd">hb inventory onboard &lt;asset-id&gt;</span>
@@ -2637,11 +2697,17 @@ security-test:
                         <pre><code><span class="comment"># Deploy everything and auto-connect (one command, zero manual steps)</span>
 <span class="prompt">$</span> <span class="cmd">hb sentinel deploy --resource-group rg-humanbound</span>
 
+<span class="comment"># Custom location and workspace name</span>
+<span class="prompt">$</span> <span class="cmd">hb sentinel deploy --rg rg-demo --location eastus --workspace la-demo</span>
+
 <span class="comment"># Deploy infrastructure only, skip webhook setup</span>
 <span class="prompt">$</span> <span class="cmd">hb sentinel deploy --rg rg-humanbound --no-connect</span>
 
 <span class="comment"># Export the script to review before running</span>
-<span class="prompt">$</span> <span class="cmd">hb sentinel deploy --rg rg-humanbound --export-only</span></code></pre>
+<span class="prompt">$</span> <span class="cmd">hb sentinel deploy --rg rg-humanbound --export-only</span>
+
+<span class="comment"># Save script to a specific file</span>
+<span class="prompt">$</span> <span class="cmd">hb sentinel deploy --rg rg-humanbound --output deploy.sh</span></code></pre>
                     </div>
                 </div>
 
@@ -2812,11 +2878,25 @@ hb --base-url https://my-humanbound-server.internal/api login</code></pre>
                         <pre><code><span class="comment"># Standard login (api.humanbound.ai)</span>
 hb login
 
+<span class="comment"># Force re-authentication (skip "already logged in" prompt)</span>
+hb login --force
+
 <span class="comment"># On-prem: login against a custom API endpoint</span>
-hb --base-url https://my-server.com/api login</code></pre>
+hb --base-url https://my-server.com/api login
+
+<span class="comment"># Use a custom callback port (default: 8085)</span>
+hb login --port 9090</code></pre>
                     </div>
                 </div>
                 <p>Opens your browser for OAuth authentication. Credentials are stored locally at <code>~/.humanbound/</code>. When using <code>--base-url</code>, the custom endpoint is persisted for subsequent commands.</p>
+                <table>
+                    <thead><tr><th>Option</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>--force, -f</code></td><td>Force re-authentication even if already logged in</td></tr>
+                        <tr><td><code>--port</code></td><td>Local OAuth callback port (default: 8085)</td></tr>
+                        <tr><td><code>--base-url</code></td><td>API base URL for on-prem deployments</td></tr>
+                    </tbody>
+                </table>
 
                 <h3>Logout</h3>
                 <div class="code-block-wrapper">
@@ -2826,7 +2906,10 @@ hb --base-url https://my-server.com/api login</code></pre>
 hb logout
 
 <span class="comment"># Also revoke browser session</span>
-hb logout --revoke</code></pre>
+hb logout --revoke
+
+<span class="comment"># Custom callback port for revoke (default: 8085)</span>
+hb logout --revoke --port 9090</code></pre>
                     </div>
                 </div>
 
@@ -2924,6 +3007,32 @@ hb docs quickstart</code></pre>
                 </div>
             </section>
 
+            <section id="shell-completion">
+                <h2>Shell Completion</h2>
+                <p>Enable tab completion for the <code>hb</code> CLI in your shell. The <code>hb completion</code> command generates the appropriate completion script for bash, zsh, or fish.</p>
+
+                <h3>Setup</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Bash</span>
+hb completion bash >> ~/.bashrc
+
+<span class="comment"># Zsh</span>
+hb completion zsh >> ~/.zshrc
+
+<span class="comment"># Fish</span>
+hb completion fish > ~/.config/fish/completions/hb.fish</code></pre>
+                    </div>
+                </div>
+
+                <p>If no shell argument is provided, the CLI auto-detects your current shell from the <code>$SHELL</code> environment variable.</p>
+
+                <div class="alert alert-info">
+                    <strong>Note:</strong> After adding the completion script, restart your shell or run <code>source ~/.bashrc</code> (or equivalent) for changes to take effect.
+                </div>
+            </section>
+
             <section id="command-reference">
                 <h2>Command Reference</h2>
                 <p>Complete reference of all available commands, organized by category.</p>
@@ -2960,6 +3069,18 @@ hb docs quickstart</code></pre>
                         <div class="command-card">
                             <h4>hb switch &lt;org-id&gt;</h4>
                             <p>Switch active organisation context</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb orgs list</h4>
+                            <p>List organisations you have access to</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb orgs current</h4>
+                            <p>Show the currently selected organisation</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb orgs subscription</h4>
+                            <p>Show subscription details (plan, quota, features)</p>
                         </div>
                     </div>
                 </div>
@@ -3239,11 +3360,15 @@ hb docs quickstart</code></pre>
                 </div>
 
                 <div class="command-group">
-                    <h3>Help</h3>
+                    <h3>Help &amp; Shell</h3>
                     <div class="command-grid">
                         <div class="command-card">
                             <h4>hb docs</h4>
                             <p>Open online documentation or specific topic</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb completion [bash|zsh|fish]</h4>
+                            <p>Generate shell tab-completion script</p>
                         </div>
                         <div class="command-card">
                             <h4>hb --help</h4>

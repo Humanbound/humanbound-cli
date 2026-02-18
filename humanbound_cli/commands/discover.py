@@ -1042,7 +1042,7 @@ def _display_context_help():
         "  [yellow]Partial[/yellow]   Some controls missing (e.g. injection protection off)\n"
         "  [red]NONE[/red]      No safety controls configured\n\n"
         "[bold]Next Steps[/bold]\n"
-        "  Use [bold]hb scan[/bold] to run adversarial security tests on testable services.",
+        "  Use [bold]hb test[/bold] to run adversarial security tests on testable services.",
         border_style="blue",
         padding=(1, 2),
     ))
