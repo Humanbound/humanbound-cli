@@ -4,7 +4,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/humanbound-cli)](https://pypi.org/project/humanbound-cli/)
 [![License](https://img.shields.io/badge/license-proprietary-blue)]()
-[![Version](https://img.shields.io/badge/version-0.4.0-green)]()
+[![Version](https://img.shields.io/badge/version-0.5.0-green)]()
 
 ```
 pip install humanbound-cli
@@ -27,6 +27,7 @@ Humanbound runs automated adversarial attacks against your bot's live endpoint, 
 | **Posture Scoring** | Quantified 0-100 security score with breakdown by findings, coverage, and resilience. Track over time. |
 | **Shadow AI Discovery** | Scan cloud tenants for AI services, assess risk with 15 SAI threat classes, and govern your AI inventory. |
 | **Guardrails Export** | Generate protection rules from test findings. Export to OpenAI, Azure AI Content Safety, AWS Bedrock, or Humanbound format. |
+| **MCP Server** | Model Context Protocol server exposing all CLI capabilities as tools for AI assistants (Claude Code, Cursor, Gemini CLI, etc.). |
 
 ### Why Humanbound?
 
@@ -475,6 +476,89 @@ hb docs
 
 Opens documentation in browser.
 
+### MCP Server
+
+Expose all Humanbound CLI capabilities as tools for AI assistants via the [Model Context Protocol](https://modelcontextprotocol.io/).
+
+```bash
+# Install with MCP dependencies
+pip install humanbound-cli[mcp]
+
+# Start the MCP server (stdio transport)
+hb mcp
+```
+
+#### Setup with AI Assistants
+
+**Claude Code:**
+
+```bash
+claude mcp add humanbound -- hb mcp
+```
+
+**Cursor** (`.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "humanbound": { "command": "hb", "args": ["mcp"] }
+  }
+}
+```
+
+**Any MCP-compatible client** — point it at `hb mcp` over stdio.
+
+#### What's Exposed
+
+| Type | Count | Examples |
+|------|-------|---------|
+| **Tools** | 55 | `hb_whoami`, `hb_run_test`, `hb_get_posture`, `hb_list_findings`, `hb_export_guardrails` |
+| **Resources** | 3 | `humanbound://context`, `humanbound://posture/{project_id}`, `humanbound://coverage/{project_id}` |
+| **Prompts** | 2 | `run_security_test` (guided test workflow), `security_review` (full review workflow) |
+
+<details>
+<summary>Full tool list</summary>
+
+**Context:** `hb_whoami`, `hb_list_organisations`, `hb_set_organisation`, `hb_set_project`
+
+**Projects:** `hb_list_projects`, `hb_get_project`, `hb_update_project`, `hb_delete_project`
+
+**Experiments:** `hb_list_experiments`, `hb_get_experiment`, `hb_get_experiment_status`, `hb_get_experiment_logs`, `hb_terminate_experiment`, `hb_delete_experiment`
+
+**Test Execution:** `hb_run_test`
+
+**Logs:** `hb_get_project_logs`
+
+**Providers:** `hb_list_providers`, `hb_add_provider`, `hb_update_provider`, `hb_remove_provider`
+
+**Findings:** `hb_list_findings`, `hb_update_finding`
+
+**Coverage & Posture:** `hb_get_coverage`, `hb_get_posture`, `hb_get_posture_trends`, `hb_get_shadow_posture`
+
+**Guardrails:** `hb_export_guardrails`
+
+**Connectors:** `hb_create_connector`, `hb_list_connectors`, `hb_get_connector`, `hb_update_connector`, `hb_delete_connector`, `hb_test_connector`, `hb_trigger_discovery`
+
+**Inventory:** `hb_list_inventory`, `hb_get_inventory_asset`, `hb_update_inventory_asset`, `hb_archive_inventory_asset`, `hb_onboard_inventory_asset`
+
+**API Keys:** `hb_list_api_keys`, `hb_create_api_key`, `hb_update_api_key`, `hb_delete_api_key`
+
+**Members:** `hb_list_members`, `hb_invite_member`, `hb_remove_member`
+
+**Webhooks:** `hb_create_webhook`, `hb_delete_webhook`, `hb_get_webhook`, `hb_list_webhook_deliveries`, `hb_test_webhook`, `hb_replay_webhook`
+
+**Campaigns:** `hb_get_campaign_plan`, `hb_break_campaign`
+
+**Upload:** `hb_upload_conversations`
+
+</details>
+
+#### Test with MCP Inspector
+
+```bash
+npx @modelcontextprotocol/inspector -- hb mcp
+```
+
 ---
 
 ## Examples
@@ -558,6 +642,18 @@ hb inventory update <id> --sanctioned --owner "security@company.com"
 # Onboard high-risk asset for security testing
 hb inventory onboard <id>
 hb test
+```
+
+### AI-assisted security testing (MCP)
+
+```bash
+# Add Humanbound to Claude Code
+claude mcp add humanbound -- hb mcp
+
+# Then in Claude Code, just ask:
+#   "Run a security test on my Support Bot project and summarize the findings"
+#   "What's my current security posture? Show me the trends"
+#   "List all critical findings and suggest remediations"
 ```
 
 ### Export guardrails

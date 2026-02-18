@@ -7,6 +7,12 @@ from . import (
     connectors, inventory, completion,
 )
 
+# MCP command is optional — only available when mcp SDK is installed
+try:
+    from . import mcp
+except ImportError:
+    mcp = None
+
 __all__ = [
     "auth",
     "orgs",
@@ -30,4 +36,5 @@ __all__ = [
     "connectors",
     "inventory",
     "completion",
+    "mcp",
 ]

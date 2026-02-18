@@ -30,6 +30,7 @@ from .commands import (
     connectors,
     inventory,
     completion,
+    mcp,
 )
 
 console = Console()
@@ -88,6 +89,10 @@ cli.add_command(discover.discover_command)
 cli.add_command(connectors.connectors_group)
 cli.add_command(inventory.inventory_group)
 cli.add_command(completion.completion_command)
+
+# MCP server (optional — requires mcp SDK)
+if mcp is not None:
+    cli.add_command(mcp.mcp_command)
 
 # Register top-level commands
 cli.add_command(init.init_project)
