@@ -783,6 +783,7 @@
                     <li><a href="#guardrails">Guardrails Export</a></li>
                     <li><a href="#firewall">Firewall</a></li>
                     <li><a href="#cicd">CI/CD Integration</a></li>
+                    <li><a href="#shadow-ai-discovery">Shadow AI Discovery</a></li>
                     <li><a href="#siem">SIEM Integration</a></li>
                     <li><a href="#deployment">Deployment Options</a></li>
                     <li><a href="#authentication">Authentication &amp; Context</a></li>
@@ -2417,6 +2418,104 @@ security-test:
                 </div>
             </section>
 
+            <section id="shadow-ai-discovery">
+                <h2>Shadow AI Discovery</h2>
+                <p>Discover and assess AI services across your cloud environment. The discovery pipeline scans your tenant client-side, sends results to the Humanbound platform for security evaluation (38 evidence signals, 15 SAI threat classes), and produces an assessed inventory with posture scoring and model lifecycle tracking.</p>
+
+                <h3>Discovery</h3>
+                <p>Run <code>hb discover</code> to scan your cloud environment for AI services. The scanner authenticates via device-code flow, queries multiple API layers (service principals, sign-in logs, resource graph, Copilot Studio, Azure OpenAI deployments), and sends results to the platform for analysis.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Scan and display results</span>
+<span class="prompt">$</span> <span class="cmd">hb discover</span>
+
+<span class="comment"># Scan, save to inventory, and export HTML report</span>
+<span class="prompt">$</span> <span class="cmd">hb discover --save --report</span>
+
+<span class="comment"># Verbose mode (show raw API responses from each layer)</span>
+<span class="prompt">$</span> <span class="cmd">hb discover --verbose</span>
+
+<span class="comment"># Output as JSON</span>
+<span class="prompt">$</span> <span class="cmd">hb discover --json</span></code></pre>
+                    </div>
+                </div>
+
+                <p>The discovery report includes:</p>
+                <ul>
+                    <li><strong>Deployed Agents</strong> &mdash; Copilot Studio agents with channel, auth, and network details</li>
+                    <li><strong>AI Endpoints</strong> &mdash; Azure OpenAI deployments with model lifecycle badges (retired, deprecated, retiring soon)</li>
+                    <li><strong>AI Adoption</strong> &mdash; Licensed and consented AI services (M365 Copilot, etc.)</li>
+                    <li><strong>In Development</strong> &mdash; ML projects and staged resources</li>
+                    <li><strong>Resource Topology</strong> &mdash; Interactive Mermaid diagram showing connections between agents, endpoints, models, and channels</li>
+                    <li><strong>Security Evaluations</strong> &mdash; Per-service threat analysis with SAI threat classes, risk scores, and remediation guidance</li>
+                    <li><strong>Posture Estimate</strong> &mdash; Organisation-level shadow AI posture score</li>
+                </ul>
+
+                <h3>Cloud Connectors</h3>
+                <p>Register cloud connectors for persistent discovery. Connectors store encrypted credentials and enable re-discovery (scheduled or on-demand).</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># Register a Microsoft connector</span>
+<span class="prompt">$</span> <span class="cmd">hb connectors add --tenant-id &lt;id&gt; --client-id &lt;id&gt; --client-secret</span>
+
+<span class="comment"># List connectors</span>
+<span class="prompt">$</span> <span class="cmd">hb connectors</span>
+
+<span class="comment"># Test connectivity</span>
+<span class="prompt">$</span> <span class="cmd">hb connectors test &lt;connector-id&gt;</span>
+
+<span class="comment"># Update credentials</span>
+<span class="prompt">$</span> <span class="cmd">hb connectors update &lt;connector-id&gt; --client-secret</span>
+
+<span class="comment"># Remove a connector</span>
+<span class="prompt">$</span> <span class="cmd">hb connectors remove &lt;connector-id&gt;</span></code></pre>
+                    </div>
+                </div>
+
+                <h3>AI Inventory</h3>
+                <p>After running <code>hb discover --save</code>, discovered assets are persisted to your AI inventory. Use the inventory commands to view, govern, and onboard assets for security testing.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <div class="code-block">
+                        <pre><code><span class="comment"># List all inventory assets</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory</span>
+
+<span class="comment"># Filter by category, vendor, or risk</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory --category copilot_studio_agent --risk-level high</span>
+
+<span class="comment"># View asset details</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory view &lt;asset-id&gt;</span>
+
+<span class="comment"># Update governance fields</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory update &lt;asset-id&gt; --sanctioned --owner "security@company.com"</span>
+
+<span class="comment"># View shadow AI posture</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory posture</span>
+
+<span class="comment"># Onboard an asset into a security testing project</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory onboard &lt;asset-id&gt;</span>
+
+<span class="comment"># Archive an asset</span>
+<span class="prompt">$</span> <span class="cmd">hb inventory archive &lt;asset-id&gt;</span></code></pre>
+                    </div>
+                </div>
+
+                <h3>Model Lifecycle</h3>
+                <p>Discovery tracks model lifecycle status across all endpoints. Models approaching end-of-life are flagged with badges in both the CLI output and HTML report:</p>
+                <ul>
+                    <li><strong style="color: #F85149;">RETIRED</strong> &mdash; Model is no longer available. Migrate immediately.</li>
+                    <li><strong style="color: #F0C000;">DEPRECATED</strong> &mdash; Model is deprecated with a known retirement date.</li>
+                    <li><strong style="color: #F0C000;">RETIRING SOON</strong> &mdash; Model retirement within 90 days. Plan migration.</li>
+                </ul>
+                <p>Lifecycle warnings appear in the hero metrics, executive summary, endpoints table, and resource topology diagram.</p>
+
+            </section>
+
             <section id="siem">
                 <h2>SIEM Integration</h2>
                 <p>Humanbound delivers security events in real time to your SOC tooling. Every finding, posture change, drift detection, and ASCAM phase transition is emitted as a structured, HMAC-signed webhook event that any SIEM, ticketing system, or automation platform can consume.</p>
@@ -2975,6 +3074,64 @@ hb docs quickstart</code></pre>
                         <div class="command-card">
                             <h4>hb upload-logs</h4>
                             <p>Upload production conversations for evaluation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-group">
+                    <h3>Shadow AI Discovery</h3>
+                    <div class="command-grid">
+                        <div class="command-card">
+                            <h4>hb discover</h4>
+                            <p>Scan cloud environment for AI services, assess risks, and generate report</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb discover --save</h4>
+                            <p>Persist results to inventory (creates findings and posture snapshots)</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb connectors</h4>
+                            <p>List registered cloud connectors</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb connectors add</h4>
+                            <p>Register new cloud connector with credentials</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb connectors test &lt;id&gt;</h4>
+                            <p>Test connector connectivity</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb connectors update &lt;id&gt;</h4>
+                            <p>Update connector name, credentials, or status</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb connectors remove &lt;id&gt;</h4>
+                            <p>Delete a connector</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb inventory</h4>
+                            <p>List discovered AI assets with filters</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb inventory view &lt;id&gt;</h4>
+                            <p>View detailed asset information</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb inventory update &lt;id&gt;</h4>
+                            <p>Update governance fields (owner, sanctioned, policy)</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb inventory posture</h4>
+                            <p>View shadow AI posture score</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb inventory onboard &lt;id&gt;</h4>
+                            <p>Create security testing project from asset</p>
+                        </div>
+                        <div class="command-card">
+                            <h4>hb inventory archive &lt;id&gt;</h4>
+                            <p>Archive an inventory asset</p>
                         </div>
                     </div>
                 </div>

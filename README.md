@@ -4,7 +4,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/humanbound-cli)](https://pypi.org/project/humanbound-cli/)
 [![License](https://img.shields.io/badge/license-proprietary-blue)]()
-[![Version](https://img.shields.io/badge/version-0.2.0-green)]()
+[![Version](https://img.shields.io/badge/version-0.4.0-green)]()
 
 ```
 pip install humanbound-cli
@@ -25,6 +25,7 @@ Humanbound runs automated adversarial attacks against your bot's live endpoint, 
 | **Adversarial Testing** | OWASP-aligned attack scenarios: single-turn, multi-turn, adaptive, and agentic. |
 | **Behavioral Testing** | Validate intent boundaries, response quality, and functional correctness. |
 | **Posture Scoring** | Quantified 0-100 security score with breakdown by findings, coverage, and resilience. Track over time. |
+| **Shadow AI Discovery** | Scan cloud tenants for AI services, assess risk with 15 SAI threat classes, and govern your AI inventory. |
 | **Guardrails Export** | Generate protection rules from test findings. Export to OpenAI, Azure AI Content Safety, AWS Bedrock, or Humanbound format. |
 
 ### Why Humanbound?
@@ -365,6 +366,58 @@ Continuous security assurance with automated campaign management (ASCAM).
 
 ASCAM phases: Reconnaissance → Hardening → Red Teaming → Analysis → Monitoring
 
+### Shadow AI Discovery
+
+Discover, assess, and govern AI services across your cloud environment.
+
+| Command | Description |
+|---------|-------------|
+| `discover` | Scan cloud tenant for AI services |
+
+Options: `--save` (persist to inventory), `--report` (HTML report), `--json` (JSON output), `--verbose` (raw API responses)
+
+### Cloud Connectors
+
+Register cloud connectors for persistent, repeatable discovery.
+
+| Command | Description |
+|---------|-------------|
+| `connectors` | List registered connectors |
+| `connectors add` | Register a new cloud connector |
+| `connectors test <id>` | Test connector connectivity |
+| `connectors update <id>` | Update connector credentials |
+| `connectors remove <id>` | Remove connector |
+
+<details>
+<summary><code>connectors add</code> options</summary>
+
+```
+--vendor            Cloud vendor (default: microsoft)
+--tenant-id         Cloud tenant ID (required)
+--client-id         App registration client ID (required)
+--client-secret     App registration client secret (prompted)
+--name              Display name for the connector
+```
+
+</details>
+
+### AI Inventory
+
+View and govern discovered AI assets.
+
+| Command | Description |
+|---------|-------------|
+| `inventory` | List all inventory assets |
+| `inventory view <id>` | View asset details |
+| `inventory update <id>` | Update governance fields |
+| `inventory posture` | View shadow AI posture score |
+| `inventory onboard <id>` | Create security testing project from asset |
+| `inventory archive <id>` | Archive an asset |
+
+Options for `inventory`: `--category`, `--risk-level`, `--json`
+
+Options for `inventory update`: `--sanctioned / --unsanctioned`, `--owner`, `--department`, `--business-purpose`, `--has-policy / --no-policy`, `--has-risk-assessment / --no-risk-assessment`
+
 ### Upload Conversation Logs
 
 Evaluate real production conversations against security judges.
@@ -487,6 +540,24 @@ hb init \
 # Use with init or test
 hb init -n "My Bot" -e ./bot-config.json
 hb test -e ./bot-config.json
+```
+
+### Shadow AI discovery & governance
+
+```bash
+# Register a cloud connector
+hb connectors add --tenant-id abc --client-id def --client-secret
+
+# Scan, save to inventory, and export report
+hb discover --save --report
+
+# Review and govern assets
+hb inventory
+hb inventory update <id> --sanctioned --owner "security@company.com"
+
+# Onboard high-risk asset for security testing
+hb inventory onboard <id>
+hb test
 ```
 
 ### Export guardrails

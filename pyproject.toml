@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "humanbound-cli"
-version = "0.3.5"
+version = "0.4.0"
 authors = [
   { name="Kostas Siabanis", email="hello@humanbound.ai" },
   { name="Demetris Gerogiannis", email="hello@humanbound.ai" },
@@ -26,6 +26,8 @@ dependencies = [
     "rich>=13.0.0",
     "requests>=2.32.0",
     "pyyaml>=6.0.0",
+    "msal>=1.31.0",
+    "pyperclip>=1.8.0",
 ]
 
 [project.optional-dependencies]

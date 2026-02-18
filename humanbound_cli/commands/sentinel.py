@@ -329,7 +329,7 @@ def status(as_json: bool):
 
         console.print("\n[bold]Recent Deliveries:[/bold]\n")
         table = Table(show_header=True, header_style="bold")
-        table.add_column("Event ID", width=12)
+        table.add_column("Event ID", no_wrap=True)
         table.add_column("Status", width=8)
         table.add_column("Attempt", justify="right", width=8)
         table.add_column("Error", width=30)
@@ -338,7 +338,7 @@ def status(as_json: bool):
         for d in delivery_data:
             code = d.get("status_code")
             error = d.get("error", "") or ""
-            event_id = str(d.get("event_id", ""))[:12]
+            event_id = str(d.get("event_id", ""))
             attempt = str(d.get("attempt", 1))
 
             if code and 200 <= code < 300:

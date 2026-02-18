@@ -1,6 +1,7 @@
 """Humanbound API client with OAuth authentication."""
 
 import json
+import os
 import time
 import webbrowser
 import http.server
@@ -16,6 +17,7 @@ from pathlib import Path
 import requests
 
 from .config import (
+    DEFAULT_BASE_URL,
     get_base_url,
     get_auth0_domain,
     get_auth0_client_id,
@@ -547,7 +549,8 @@ class HumanboundClient:
             self._default_organisation_id = credentials.get("default_organisation_id")
             # Restore saved base_url unless explicitly overridden via --base-url or env var
             saved_url = credentials.get("base_url")
-            if saved_url and self.base_url == get_base_url().rstrip("/"):
+            env_override = os.environ.get("HUMANBOUND_BASE_URL")
+            if saved_url and not env_override and self.base_url == DEFAULT_BASE_URL.rstrip("/"):
                 self.base_url = saved_url.rstrip("/")
 
     def _load_credentials_file(self) -> dict:
@@ -1081,6 +1084,7 @@ class HumanboundClient:
             data["lang"] = lang
         return self.post(f"projects/{project_id}/datasets/conversations", data=data, include_project=True)
 
+
     # -------------------------------------------------------------------------
     # Subscription Methods
     # -------------------------------------------------------------------------
@@ -1144,6 +1148,150 @@ class HumanboundClient:
         if event_type:
             data["event_type"] = event_type
         return self.post(f"organisations/{org_id}/webhooks/{webhook_id}/replay", data=data, include_org=False)
+
+    # -------------------------------------------------------------------------
+    # Connector & Inventory Methods (Shadow AI Discovery)
+    # -------------------------------------------------------------------------
+
+    def create_connector(self, vendor: str, tenant_id: str, client_id: str, client_secret: str,
+                         display_name: Optional[str] = None, scopes: Optional[List[str]] = None) -> dict:
+        """Register a new cloud connector."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        data = {
+            "vendor": vendor,
+            "credentials": {
+                "tenant_id": tenant_id,
+                "client_id": client_id,
+                "client_secret": client_secret,
+            },
+        }
+        if display_name:
+            data["display_name"] = display_name
+        if scopes:
+            data["scopes"] = scopes
+        return self.post("connectors", data=data)
+
+    def list_connectors(self) -> list:
+        """List all connectors for the current organisation."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        return self.get("connectors")
+
+    def get_connector(self, connector_id: str) -> dict:
+        """Get a single connector."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        return self.get(f"connectors/{connector_id}")
+
+    def update_connector(self, connector_id: str, data: dict) -> dict:
+        """Update a connector."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        return self.put(f"connectors/{connector_id}", data=data)
+
+    def delete_connector(self, connector_id: str) -> None:
+        """Delete a connector."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        self.delete(f"connectors/{connector_id}")
+
+    def test_connector(self, connector_id: str) -> dict:
+        """Test connection validity for a connector."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        return self.post(f"connectors/{connector_id}/test")
+
+    def trigger_discovery(self, connector_id: str) -> dict:
+        """Trigger a discovery scan for a connector."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        return self.post(
+            "discover",
+            data={"connector_id": connector_id},
+            timeout=LONG_TIMEOUT,
+        )
+
+    def list_inventory(self, category: Optional[str] = None, vendor: Optional[str] = None,
+                       risk_level: Optional[str] = None, is_sanctioned: Optional[bool] = None,
+                       page: int = 1, size: int = 50) -> dict:
+        """List discovered inventory assets."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        params: Dict[str, Any] = {"page": page, "size": size}
+        if category:
+            params["category"] = category
+        if vendor:
+            params["vendor"] = vendor
+        if risk_level:
+            params["risk_level"] = risk_level
+        if is_sanctioned is not None:
+            params["is_sanctioned"] = str(is_sanctioned).lower()
+        return self.get("inventory", params=params)
+
+    def get_inventory_asset(self, asset_id: str) -> dict:
+        """Get a single inventory asset."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        return self.get(f"inventory/{asset_id}")
+
+    def update_inventory_asset(self, asset_id: str, data: dict) -> dict:
+        """Update governance fields on an inventory asset."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        return self.put(f"inventory/{asset_id}", data=data)
+
+    def archive_inventory_asset(self, asset_id: str) -> dict:
+        """Archive an inventory asset."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        return self.put(f"inventory/{asset_id}/archive")
+
+    def get_shadow_posture(self) -> dict:
+        """Get shadow AI posture from the org posture endpoint."""
+        org_id = self._organisation_id
+        if not org_id:
+            raise ValidationError("No organisation selected.")
+        result = self.get(f"organisations/{org_id}/posture", include_org=False)
+        shadow = result.get("dimensions", {}).get("shadow_ai")
+        if not shadow:
+            return {"score": 100.0, "grade": "A", "total_assets": 0,
+                    "shadow_count": 0, "sanctioned_count": 0, "domain_scores": {}}
+        return shadow
+
+    def persist_discovery(self, nonce: str) -> dict:
+        """Persist analysed discovery results to inventory.
+
+        POST /organisations/{org_id}/analyse/persist with x-nonce header.
+
+        Args:
+            nonce: Single-use nonce from the /analyse response.
+
+        Returns:
+            Persistence summary dict.
+        """
+        org_id = self._organisation_id
+        if not org_id:
+            raise ValidationError("No organisation selected.")
+        self._ensure_authenticated()
+        headers = self._get_headers(include_org=False)
+        headers["x-nonce"] = nonce
+        response = requests.post(
+            f"{self.base_url}/organisations/{org_id}/analyse/persist",
+            headers=headers,
+            json={},
+            timeout=LONG_TIMEOUT,
+        )
+        return self._handle_response(response)
+
+    def onboard_inventory_asset(self, asset_id: str, project_name: Optional[str] = None) -> dict:
+        """Create a project from an inventory asset."""
+        if not self._organisation_id:
+            raise ValidationError("No organisation selected.")
+        data = {}
+        if project_name:
+            data["name"] = project_name
+        return self.post(f"inventory/{asset_id}/onboard", data=data)
 
 
 # Import ValidationError to this module

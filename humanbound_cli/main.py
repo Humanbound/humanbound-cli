@@ -26,6 +26,10 @@ from .commands import (
     campaigns,
     upload_logs,
     sentinel,
+    discover,
+    connectors,
+    inventory,
+    completion,
 )
 
 console = Console()
@@ -80,6 +84,10 @@ cli.add_command(api_keys.api_keys_group)
 cli.add_command(members.members_group)
 cli.add_command(campaigns.campaigns_group)
 cli.add_command(sentinel.sentinel_group)
+cli.add_command(discover.discover_command)
+cli.add_command(connectors.connectors_group)
+cli.add_command(inventory.inventory_group)
+cli.add_command(completion.completion_command)
 
 # Register top-level commands
 cli.add_command(init.init_project)
